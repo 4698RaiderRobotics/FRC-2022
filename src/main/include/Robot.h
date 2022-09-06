@@ -25,20 +25,36 @@
 #include <wpi/span.h>
 
 #include <cstdio>
+#include <iostream>
+ 
 
 class Robot : public frc::TimedRobot {
  public:
-  frc::Spark m_left_front_Motor{2};
-  frc::Spark m_left_rear_Motor{3};
-  frc::Spark m_right_front_Motor{0};
-  frc::Spark m_right_rear_Motor{1};
+  frc::Spark m_left_front_Motor{1};
+  frc::Spark m_left_rear_Motor{0};
+  frc::Spark m_right_front_Motor{3};
+  frc::Spark m_right_rear_Motor{2};
   frc::MotorControllerGroup m_right{m_left_front_Motor, m_left_rear_Motor};
   frc::MotorControllerGroup m_left{m_right_front_Motor, m_right_rear_Motor};
   frc::DifferentialDrive m_robotDrive{m_left, m_right};
   frc::XboxController m_driverController{0};
+
+  
   
   TalonFX fx{0};
 
+
+  //limelight
+  std::shared_ptr<nt::NetworkTable> table = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
+  // Target Offset Angle Horizontal
+  double tx;
+  // Target Offset Angle Vertical
+  double ty;
+  // Target Area
+  double ta;
+  // Target Skew
+  double ts;
+  double steeringadjust;
 
   void RobotInit() override;
   void RobotPeriodic() override;
@@ -57,4 +73,6 @@ class Robot : public frc::TimedRobot {
 
   void SimulationInit() override;
   void SimulationPeriodic() override;
+
+  double AutoTargetTurn();
 };
