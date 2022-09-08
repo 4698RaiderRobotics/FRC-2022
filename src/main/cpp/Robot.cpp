@@ -9,20 +9,28 @@ void Robot::RobotInit() {
   fx.ConfigFactoryDefault();
 
   m_left.SetInverted(true);
-  printf("robotinitt");
+  //camera
+  frc::CameraServer::StartAutomaticCapture();
 
+
+/*   orc.AddInstrument(fx);
+  
+  orc.LoadMusic("sus2.chrp");  */ 
 
 }
 void Robot::RobotPeriodic() {
 }
 
 void Robot::AutonomousInit() {
-
-
+  if(!orc.IsPlaying()) {
+    orc.Play();
+  }
 }
 void Robot::AutonomousPeriodic() {}
 
-void Robot::TeleopInit() {}
+void Robot::TeleopInit() {
+  table->PutNumber("pipeline", 1);
+}
 void Robot::TeleopPeriodic() {
 /*   m_robotDrive.TankDrive(-m_driverController.GetRightY(),
                           -m_driverController.GetLeftY()); */
@@ -35,6 +43,7 @@ void Robot::TeleopPeriodic() {
     m_robotDrive.ArcadeDrive(0, AutoTargetTurn());
   }
   else {
+    table->PutNumber("pipeline", 1);
     m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),-m_driverController.GetRightX());
   }
 }
@@ -43,15 +52,17 @@ void Robot::DisabledInit() {}
 void Robot::DisabledPeriodic() {}
 
 void Robot::TestInit() {
-    printf("testinit");
+  printf("testinit");
 
 }
-void Robot::TestPeriodic() {}
+void Robot::TestPeriodic() {
+}
 
 void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
 
 double Robot::AutoTargetTurn(){
+  table->PutNumber("pipeline", 0);
   tx = table->GetNumber("tx",0.0);
   ty = table->GetNumber("ty",0.0);
   frc::SmartDashboard::PutNumber("tx", tx);
@@ -72,6 +83,9 @@ double Robot::AutoTargetTurn(){
     steeringadjust = 0;
   }
   return steeringadjust;
+}
+double Robot::DetermineDistance(){
+  
 }
 
 #ifndef RUNNING_FRC_TESTS

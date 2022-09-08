@@ -15,7 +15,7 @@
 // phoenix TalonFX 
 #include <ctre/Phoenix.h>
 
-//limelight-related libaries
+// limelight-related libaries
 
 #include <frc/smartdashboard/Smartdashboard.h>
 #include <networktables/NetworkTable.h>
@@ -26,8 +26,13 @@
 
 #include <cstdio>
 #include <iostream>
+#include <string.h>
  
-
+// Camera
+#include <cameraserver/CameraServer.h>
+//orchestra (literally just music)
+#include <ctre/phoenix/music/Orchestra.h>
+#include <frc/Filesystem.h>
 class Robot : public frc::TimedRobot {
  public:
   frc::Spark m_left_front_Motor{1};
@@ -42,6 +47,8 @@ class Robot : public frc::TimedRobot {
   
   
   TalonFX fx{0};
+  Orchestra orc;
+  
 
 
   //limelight
@@ -75,4 +82,5 @@ class Robot : public frc::TimedRobot {
   void SimulationPeriodic() override;
 
   double AutoTargetTurn();
+  double DetermineDistance();
 };
