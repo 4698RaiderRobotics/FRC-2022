@@ -27,12 +27,15 @@
 #include <cstdio>
 #include <iostream>
 #include <string.h>
+#include <cmath>
  
 // Camera
 #include <cameraserver/CameraServer.h>
 //orchestra (literally just music)
 #include <ctre/phoenix/music/Orchestra.h>
 #include <frc/Filesystem.h>
+
+#include <wpi/math>
 class Robot : public frc::TimedRobot {
  public:
   frc::Spark m_left_front_Motor{1};
@@ -48,7 +51,10 @@ class Robot : public frc::TimedRobot {
   
   TalonFX fx{0};
   Orchestra orc;
-  
+
+  double L = 2;
+  double K = 0.8;
+  double x_0 = 0;  
 
 
   //limelight
@@ -61,6 +67,29 @@ class Robot : public frc::TimedRobot {
   double ta;
   // Target Skew
   double ts;
+  float kp = -0.1f;
+  float min_command = 0.5f;
+  /*
+        /         ⁄
+      /𝜃_2   ⁄    ⤒
+    /   ⁄   𝜃_1   | 
+  🎥---->        h_2
+  ⌆ |<---- d ---->|
+  |               |
+ h_1              |
+  ⤓               ⤓
+  */ 
+ // link to a much better illustration:
+ // https://docs.limelightvision.io/en/latest/_images/DistanceEstimation.jpg
+  double h_1; // hieght of camera above the floor
+  double h_2; // hieght of reflective target
+  double theta_1; // fixed angle of the mounted limelight
+  double theta_2; // angle of the camera to targ  et (theta_2 = ty)
+  double d; // distance to target (lol) (should be returned by DetermineDistance())
+  
+
+
+
   double steeringadjust;
 
   void RobotInit() override;
