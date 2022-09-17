@@ -39,13 +39,6 @@ void Robot::TeleopPeriodic() {
 /*   m_robotDrive.TankDrive(-m_driverController.GetRightY(),
                           -m_driverController.GetLeftY()); */
   //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),-m_driverController.GetRightX());
-  bool squared;
-  if(m_driverController.GetBButtonPressed()){
-    squared = true;
-  }
-  if(m_driverController.GetXButtonPressed()){
-    squared=false;
-  }
 
   if (m_driverController.GetAButton()) {
     printf("steeringadjust: %f \n", AutoTargetTurn());
@@ -57,7 +50,7 @@ void Robot::TeleopPeriodic() {
     //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),-m_driverController.GetRightX());
     
     double scaled_inputs = (L/(1+std::pow(wpi::math::e,K*m_driverController.GetRightX())))-1;
-    std::cout << "Input Raw: " << m_driverController.GetRightX() << " Input Scaled " << scaled_inputs << "\n";
+    //std::cout << "Input Raw: " << m_driverController.GetRightX() << " Input Scaled " << scaled_inputs << "\n";
     
     m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),scaled_inputs, false);
 
