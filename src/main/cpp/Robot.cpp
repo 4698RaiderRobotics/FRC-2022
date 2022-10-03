@@ -41,10 +41,7 @@ void Robot::TeleopPeriodic() {
     //table->PutNumber("pipeline", 1);
     //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),-m_driverController.GetRightX());
     
-    std::cout << "Input Raw: " << m_driverController.GetRightX() << " Input Scaled " << scaled_inputs << "\n";
-    
-    //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),scaled_inputs, false);
-
+  
   } */
 }
 
