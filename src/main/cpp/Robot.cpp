@@ -6,16 +6,15 @@
 
 void Robot::RobotInit() {
   // todo set all motors to factory defaults?
-  fx.ConfigFactoryDefault();
-
-  m_left.SetInverted(true);
+  //do i want to do this? ⬇️
+  m_leftLeadMotor.RestoreFactoryDefaults();
+  m_rightLeadMotor.RestoreFactoryDefaults();
+  m_leftFollowMotor.RestoreFactoryDefaults();
+  m_rightFollowMotor.RestoreFactoryDefaults();
+  m_leftFollowMotor.Follow(m_leftLeadMotor);
+  m_rightFollowMotor.Follow(m_rightLeadMotor);
   //camera
   frc::CameraServer::StartAutomaticCapture();
-
-
-/*   orc.AddInstrument(fx);
-  
-  orc.LoadMusic("sus2.chrp");  */ 
 
 }
 void Robot::RobotPeriodic() {
@@ -24,44 +23,29 @@ void Robot::RobotPeriodic() {
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
 }
-
-void Robot::AutonomousInit() {
-  if(!orc.IsPlaying()) {
-    orc.Play();
-  }
-}
+void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
-
-void Robot::TeleopInit() {
-  //table->PutNumber("pipeline", 1);
-}
+void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic() {
-/*   m_robotDrive.TankDrive(-m_driverController.GetRightY(),
-                          -m_driverController.GetLeftY()); */
-  //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),-m_driverController.GetRightX());
-  bool squared;
-  if(m_driverController.GetBButtonPressed()){
-    squared = true;
-  }
-  if(m_driverController.GetXButtonPressed()){
-    squared=false;
-  }
+  //Uppy-Downy-Lefty-Righty™️ controls:
+  //m_robotDrive.ArcadeDrive(-m_driverController.GetRightX(),m_driverController.GetRightY());
+  //Forza™️ Controls: 
+  m_robotDrive.ArcadeDrive(-m_driverController.GetRightX(),m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
 
-  if (m_driverController.GetAButton()) {
+  /*   if (m_driverController.GetAButton()) {
     printf("steeringadjust: %f \n", AutoTargetTurn());
     //std::cout << "steering adjust" << AutoTargetTurn(); 
-    m_robotDrive.ArcadeDrive(0, AutoTargetTurn());
+    //m_robotDrive.ArcadeDrive(0, AutoTargetTurn());
   }
   else {
     //table->PutNumber("pipeline", 1);
     //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),-m_driverController.GetRightX());
     
-    double scaled_inputs = (L/(1+std::pow(wpi::math::e,K*m_driverController.GetRightX())))-1;
     std::cout << "Input Raw: " << m_driverController.GetRightX() << " Input Scaled " << scaled_inputs << "\n";
     
-    m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),scaled_inputs, false);
+    //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),scaled_inputs, false);
 
-  }
+  } */
 }
 
 void Robot::DisabledInit() {}
