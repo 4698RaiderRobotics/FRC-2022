@@ -1,18 +1,8 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 #include "Robot.h"
-
+// to-do
+// implement https://docs.wpilib.org/en/latest/docs/software/pathplanning/trajectory-tutorial/index.html
 void Robot::RobotInit() {
-  // todo set all motors to factory defaults?
-  //do i want to do this? ⬇️
-  m_leftLeadMotor.RestoreFactoryDefaults();
-  m_rightLeadMotor.RestoreFactoryDefaults();
-  m_leftFollowMotor.RestoreFactoryDefaults();
-  m_rightFollowMotor.RestoreFactoryDefaults();
-  m_leftFollowMotor.Follow(m_leftLeadMotor);
-  m_rightFollowMotor.Follow(m_rightLeadMotor);
+  SetupMotors();
   //camera
   frc::CameraServer::StartAutomaticCapture();
 
@@ -22,42 +12,39 @@ void Robot::RobotPeriodic() {
   ty = table->GetNumber("ty",0.0);
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
+
 }
 void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
 void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic() {
-  //Uppy-Downy-Lefty-Righty™️ controls:
-  //m_robotDrive.ArcadeDrive(-m_driverController.GetRightX(),m_driverController.GetRightY());
-  //Forza™️ Controls: 
-  m_robotDrive.ArcadeDrive(-m_driverController.GetRightX(),m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
+  //m_intakeSpinMotor.Set(0.5);
+  //m_intakeSpoolMotor.Set(TalonSRXControlMode{0}, -1.0);
+  //m_frontSpoolMotor.Set(1);
+  //m_rightShooterMotor.Set(ControlMode{0}, 10);
+  //m_leftShooterMotor.Set(ControlMode{0}, -10);
+  //m_backShooterMotor.Set(ControlMode{0}, -1.0);
+  DriveMethod();
 
-  /*   if (m_driverController.GetAButton()) {
-    printf("steeringadjust: %f \n", AutoTargetTurn());
-    //std::cout << "steering adjust" << AutoTargetTurn(); 
-    //m_robotDrive.ArcadeDrive(0, AutoTargetTurn());
-  }
-  else {
-    //table->PutNumber("pipeline", 1);
-    //m_robotDrive.ArcadeDrive(-m_driverController.GetRightY(),-m_driverController.GetRightX());
-    
-  
-  } */
 }
 
 void Robot::DisabledInit() {}
 void Robot::DisabledPeriodic() {}
-
-void Robot::TestInit() {
-  printf("testinit");
-
-}
-void Robot::TestPeriodic() {
-}
-
+void Robot::TestInit() {}
+void Robot::TestPeriodic() {}
 void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
+void Robot::DriveMethod(){
+  //Forza™️ Controls:
+  m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
+  m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetLeftTriggerAxis());
+  m_robotDrive.ArcadeDrive(-m_driverController.GetRightX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
+}
 
+void Robot::Intake(){
+
+  m_intakeSpinMotor.Set(m_operatorController.GetLeftTriggerAxis());
+}
 double Robot::AutoTargetTurn(){
   table->PutNumber("pipeline", 0);
   
