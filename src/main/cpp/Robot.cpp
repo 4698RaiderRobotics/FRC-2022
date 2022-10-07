@@ -18,12 +18,16 @@ void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
 void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic() {
-  //m_intakeSpinMotor.Set(0.5);
-  //m_intakeSpoolMotor.Set(TalonSRXControlMode{0}, -1.0);
-  //m_frontSpoolMotor.Set(1);
-  //m_rightShooterMotor.Set(ControlMode{0}, 10);
-  //m_leftShooterMotor.Set(ControlMode{0}, -10);
-  //m_backShooterMotor.Set(ControlMode{0}, -1.0);
+
+  if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
+    Intake();
+  }
+  if(m_operatorController.GetRightTriggerAxis() > 0.5) {
+    Shoot(true);
+  }
+  else {
+    Shoot(false);
+  }
   DriveMethod();
 
 }
@@ -34,17 +38,6 @@ void Robot::TestInit() {}
 void Robot::TestPeriodic() {}
 void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
-void Robot::DriveMethod(){
-  //Forza™️ Controls:
-  m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
-  m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetLeftTriggerAxis());
-  m_robotDrive.ArcadeDrive(-m_driverController.GetRightX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
-}
-
-void Robot::Intake(){
-
-  m_intakeSpinMotor.Set(m_operatorController.GetLeftTriggerAxis());
-}
 double Robot::AutoTargetTurn(){
   table->PutNumber("pipeline", 0);
   

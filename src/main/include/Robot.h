@@ -92,7 +92,7 @@ struct Robot : public frc::TimedRobot {
     }
     for (TalonFX* motor : Talons) {
       motor->ConfigFactoryDefault();
-      motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{false, 50, 50, 1});
+      motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 50, 50, 1});
       motor->ConfigStatorCurrentLimit(StatorCurrentLimitConfiguration{true,100,100,1.0});
 
       }
@@ -113,8 +113,23 @@ struct Robot : public frc::TimedRobot {
 
   
   }
-  void DriveMethod();
-  void Intake();
+  void DriveMethod(){
+    //Forza™️ Controls:
+    m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
+    m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetLeftTriggerAxis());
+    m_robotDrive.ArcadeDrive(-m_driverController.GetRightX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
+  }
+  void Intake() {
+    m_intakeSpinMotor.Set(m_operatorController.GetLeftTriggerAxis());
+  }
+  void Shoot(double speed) {
+    m_intakeSpinMotor.Set(speed);
+    m_intakeSpoolMotor.Set(TalonSRXControlMode{0}, -speed);
+    m_frontSpoolMotor.Set(speed);
+    m_rightShooterMotor.Set(ControlMode{0}, -speed);
+/*   m_leftShooterMotor.Set(ControlMode{0}, -1);*/
+    m_backShooterMotor.Set(ControlMode{0}, -speed); 
+  }
   double AutoTargetTurn();
   double DetermineDistance();
 };
