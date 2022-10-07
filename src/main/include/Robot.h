@@ -2,7 +2,6 @@
 
 #include <frc/TimedRobot.h>
 #include <frc/XboxController.h>
-#include <frc/TimedRobot.h>
 #include <frc/drive/DifferentialDrive.h>
 #include <rev/CANSparkMax.h>
 #include <ctre/Phoenix.h>
