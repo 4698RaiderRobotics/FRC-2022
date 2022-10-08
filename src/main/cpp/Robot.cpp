@@ -23,12 +23,13 @@ void Robot::TeleopPeriodic() {
     Intake();
   }
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
-    Shoot(true);
+    Shoot(true); 
   }
   else {
     Shoot(false);
   }
   DriveMethod();
+
 
 }
 

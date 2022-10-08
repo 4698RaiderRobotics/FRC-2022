@@ -33,14 +33,18 @@ struct Robot : public frc::TimedRobot {
   frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
   // Intake Motors
   rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
-   TalonSRX m_intakeSpoolMotor{18}; 
+  TalonSRX m_intakeSpoolMotor{18}; 
   TalonFX m_rightShooterMotor{15};
   TalonFX m_leftShooterMotor{19};
   TalonFX m_backShooterMotor{17};
   TalonFX* Talons[3] = {&m_rightShooterMotor, &m_leftShooterMotor, &m_backShooterMotor};
+  //find actual id of intake arm ⬇️
+  TalonFX m_intakeArm{1};
+  
   frc::XboxController m_driverController{0};
   frc::XboxController m_operatorController{1};
   
+
   double L = 2;
   double K = 0.8;
   double x_0 = 0;  
@@ -120,6 +124,9 @@ struct Robot : public frc::TimedRobot {
   }
   void Intake() {
     m_intakeSpinMotor.Set(m_operatorController.GetLeftTriggerAxis());
+    ctre::phoenix::motorcontrol::ControlMode::Position;
+    ControlMode{1};
+    m_intakeArm.Set(ControlMode{1}, )
   }
   void Shoot(double speed) {
     m_intakeSpinMotor.Set(speed);
