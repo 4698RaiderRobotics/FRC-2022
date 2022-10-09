@@ -19,8 +19,11 @@ void Robot::AutonomousPeriodic() {}
 void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic() {
 
-  if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
-    Intake();
+  if(m_operatorController.GetXButton()) {
+    Intake(-0.6);
+  }
+  else{
+    Intake(0);
   }
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
     Shoot(true); 
@@ -28,6 +31,7 @@ void Robot::TeleopPeriodic() {
   else {
     Shoot(false);
   }
+  
   DriveMethod();
 
 
