@@ -49,6 +49,9 @@ void Robot::TeleopPeriodic() {
   else{
     m_intakeArm.Set(ControlMode::PercentOutput, 0);
   }
+  if (m_driverController.GetAButton()) {
+    AutoTargetTurn();
+  }
   DriveMethod();
 
 
