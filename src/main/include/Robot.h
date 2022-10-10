@@ -128,7 +128,7 @@ struct Robot : public frc::TimedRobot {
     //Forza™️ Controls:
     m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
     m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetLeftTriggerAxis());
-    m_robotDrive.ArcadeDrive(-m_driverController.GetRightX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
+    m_robotDrive.ArcadeDrive(-m_driverController.GetLeftX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
   }
   void Intake(double speed) {
     m_intakeSpinMotor.Set(ctre::phoenix::motorcontrol::ControlMode{0}, speed);
