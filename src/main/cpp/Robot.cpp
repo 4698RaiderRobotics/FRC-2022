@@ -16,9 +16,13 @@ void Robot::RobotPeriodic() {
 }
 void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
-void Robot::TeleopInit() {}
+void Robot::TeleopInit() {
+  //reset intake arm encoder postition
+  m_intakeArm.SetSelectedSensorPosition(0); 
+  frc::SmartDashboard::PutBoolean("intake_arm_retracted", true);
+}
 void Robot::TeleopPeriodic() {
-
+  frc::SmartDashboard::PutNumber("Intake Arm Selected Sensor position", m_intakeArm.GetSelectedSensorPosition());
   if(m_operatorController.GetXButton()) {
     Intake(-0.6);
   }
@@ -31,7 +35,20 @@ void Robot::TeleopPeriodic() {
   else {
     Shoot(false);
   }
-  
+  if(m_operatorController.GetRightBumper()) {
+    double velocity = m_intakeArm.GetSelectedSensorVelocity();
+    frc::SmartDashboard::PutNumber("Arm Velocity", velocity);
+    m_intakeArm.Set(ControlMode::PercentOutput, 0.2);
+    //m_intakeArm.Set(ControlMode::Position)'
+    //64:1
+
+  }
+  else if(m_operatorController.GetLeftBumper()) {
+    m_intakeArm.Set(ControlMode::PercentOutput, -0.2);
+  }
+  else{
+    m_intakeArm.Set(ControlMode::PercentOutput, 0);
+  }
   DriveMethod();
 
 

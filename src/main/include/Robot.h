@@ -18,10 +18,11 @@
 #include <cstdio>
 #include <iostream>
 #include <string.h>
-#include <cmath>
+#include <wpi/numbers>
 #include <wpi/math>
 #include <cameraserver/CameraServer.h>
 #include <map>
+#include <cmath>
 struct Robot : public frc::TimedRobot {
   // Drive Motors
   static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
@@ -44,12 +45,14 @@ struct Robot : public frc::TimedRobot {
   TalonFX m_leftShooterMotor{19};
   TalonFX m_backShooterMotor{17};
   TalonFX* Talons[3] = {&m_rightShooterMotor, &m_leftShooterMotor, &m_backShooterMotor};
-  //find actual id of intake arm ⬇️
-  //TalonFX m_intakeArm{1};
+  
+  TalonFX m_intakeArm{20};
   
   frc::XboxController m_driverController{0};
   frc::XboxController m_operatorController{1};
-  
+
+  //frc2::PIDController pid{kP, kI, kD};
+
 
   double L = 2;
   double K = 0.8;
