@@ -33,7 +33,7 @@ void Robot::TeleopPeriodic() {
     Shoot(true); 
   }
   else if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
-    m_rightShooterMotor.Set(ControlMode::PercentOutput, -1);
+    //m_rightShooterMotor.Set(ControlMode::PercentOutput, -1);
   }
   else {
     Shoot(false);

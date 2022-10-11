@@ -112,10 +112,14 @@ struct Robot : public frc::TimedRobot {
       motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true,30,30,0});
       motor->SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
     }
-    m_rightShooterMotor.SetInverted(true);
-    //m_backShooterMotor.SetInverted(true);
+    //m_rightShooterMotor.SetInverted(true);
+    m_backShooterMotor.SetInverted(true);
+    m_leftShooterMotor.SetInverted(true);
     m_rightShooterMotor.Follow(m_leftShooterMotor);
     m_backShooterMotor.Follow(m_leftShooterMotor);
+
+    //m_rightShooterMotor.Follow(m_leftShooterMotor);
+    //m_backShooterMotor.Follow(m_leftShooterMotor);
     m_frontSpoolMotor.RestoreFactoryDefaults();
     m_frontSpoolMotor.SetSmartCurrentLimit(30);
     m_leftFollowMotor.Follow(m_leftLeadMotor);
@@ -135,11 +139,12 @@ struct Robot : public frc::TimedRobot {
   }
   void Shoot(double speed) {
     //m_intakeSpinMotor.Set(speed);
-    m_intakeSpoolMotor.Set(TalonSRXControlMode{0}, -speed);
-    m_frontSpoolMotor.Set(speed);
-    m_rightShooterMotor.Set(ControlMode{0}, -speed);
-/*   m_leftShooterMotor.Set(ControlMode{0}, -1);*/
-    m_backShooterMotor.Set(ControlMode{0}, -speed); 
+    //m_intakeSpoolMotor.Set(TalonSRXControlMode{0}, -speed);
+    //m_frontSpoolMotor.Set(speed);
+    //m_rightShooterMotor.Set(ControlMode{0}, -speed);
+    //m_leftShooterMotor.Set(ControlMode{0}, -speed);
+    //m_backShooterMotor.Set(ControlMode{0}, -speed); 
+    m_leftShooterMotor.Set(ControlMode{0}, speed);
   }
   double AutoTargetTurn();
   double DetermineDistance();
