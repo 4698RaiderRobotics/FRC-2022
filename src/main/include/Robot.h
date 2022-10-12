@@ -9,22 +9,20 @@
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/simulation/DifferentialDrivetrainSim.h>
 
-//limelight 💩
+//limelight 💩{
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTableEntry.h>
 #include <networktables/NetworkTableValue.h>
+//}
 #include <wpi/span.h>
-#include <cstdio>
 #include <iostream>
 #include <string.h>
 #include <wpi/numbers>
 #include <wpi/math>
 #include <cameraserver/CameraServer.h>
-#include <map>
 #include <cmath>
 #include <algorithm>
-#include <string.h>
 struct Robot : public frc::TimedRobot {
   // Drive Motors
   static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
@@ -36,7 +34,6 @@ struct Robot : public frc::TimedRobot {
   rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
   rev::SparkMaxRelativeEncoder* DriveEncoders[4] = {&DriveMotors[0]->GetEncoder(),&DriveMotors[1]->GetEncoder(),&DriveMotors[2]->GetEncoder(),&DriveMotors[3]->GetEncoder()};  
   frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
-  
   // Intake Motors
   //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
   TalonSRX m_intakeSpinMotor{14};
@@ -52,7 +49,6 @@ struct Robot : public frc::TimedRobot {
   
   frc::XboxController m_driverController{0};
   frc::XboxController m_operatorController{1};
-
   //frc2::PIDController pid{kP, kI, kD};
 
 
