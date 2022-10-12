@@ -35,6 +35,7 @@ struct Robot : public frc::TimedRobot {
   rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
 
   frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
+  
   // Intake Motors
   //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
   TalonSRX m_intakeSpinMotor{14};
