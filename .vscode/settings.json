@@ -15,5 +15,9 @@
     "**/*~": true
   },
   "C_Cpp.default.configurationProvider": "vscode-wpilib",
-  "editor.fontFamily": "Fira Code, Consolas, 'Courier New', monospace"
+  "editor.fontFamily": "Fira Code, Consolas, 'Courier New', monospace",
+  "files.associations": {
+    "*.h": "cpp",
+    "sstream": "cpp"
+  }
 }

@@ -23,6 +23,8 @@
 #include <cameraserver/CameraServer.h>
 #include <map>
 #include <cmath>
+#include <algorithm>
+#include <string.h>
 struct Robot : public frc::TimedRobot {
   // Drive Motors
   static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
@@ -31,9 +33,8 @@ struct Robot : public frc::TimedRobot {
   rev::CANSparkMax m_leftFollowMotor{leftFollowDeviceID, rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_rightFollowMotor{rightFollowDeviceID, rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax* DriveMotors[4]= {&m_leftLeadMotor, &m_rightLeadMotor, &m_leftFollowMotor, &m_rightFollowMotor};
-
   rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
-
+  rev::SparkMaxRelativeEncoder* DriveEncoders[4] = {&DriveMotors[0]->GetEncoder(),&DriveMotors[1]->GetEncoder(),&DriveMotors[2]->GetEncoder(),&DriveMotors[3]->GetEncoder()};  
   frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
   
   // Intake Motors

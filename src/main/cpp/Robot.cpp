@@ -5,13 +5,18 @@ void Robot::RobotInit() {
   SetupMotors();
   //camera
   frc::CameraServer::StartAutomaticCapture();
-
 }
 void Robot::RobotPeriodic() {
   tx = table->GetNumber("tx",0.0);
   ty = table->GetNumber("ty",0.0);
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
+  //display motor encorers on shuffleboard/smartdashboard
+
+  std::for_each(DriveEncoders,DriveEncoders+4, [=](int i = 0){
+    frc::SmartDashboard::PutNumber(std::to_string(i), DriveEncoders[i]->GetPosition());
+    i++;
+  });
 
 }
 void Robot::AutonomousInit() {}
