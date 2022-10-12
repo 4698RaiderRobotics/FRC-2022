@@ -30,13 +30,17 @@ void Robot::TeleopPeriodic() {
     Intake(0);
   }
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
-    Shoot(true); 
-  }
-  else if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
-    //m_rightShooterMotor.Set(ControlMode::PercentOutput, -1);
+    Shoot(1.0); 
   }
   else {
-    Shoot(false);
+    Shoot(0.0);
+  }
+  if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
+    m_backTriggerMotor.Set(ControlMode::PercentOutput, -1.0);
+    m_frontTriggerMotor.Set(-1.0);
+  } else {
+    m_backTriggerMotor.Set(ControlMode::PercentOutput, 0.0);
+    m_frontTriggerMotor.Set(0.0);
   }
   if(m_operatorController.GetRightBumper()) {
     double velocity = m_intakeArm.GetSelectedSensorVelocity();

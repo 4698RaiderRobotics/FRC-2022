@@ -32,14 +32,14 @@ struct Robot : public frc::TimedRobot {
   rev::CANSparkMax m_rightFollowMotor{rightFollowDeviceID, rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax* DriveMotors[4]= {&m_leftLeadMotor, &m_rightLeadMotor, &m_leftFollowMotor, &m_rightFollowMotor};
 
-  rev::CANSparkMax m_frontSpoolMotor{6, rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
 
   frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
   // Intake Motors
   //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
   TalonSRX m_intakeSpinMotor{14};
-  TalonSRX m_intakeSpoolMotor{18}; 
-  TalonSRX* seven_seventies[2] = {&m_intakeSpinMotor, &m_intakeSpoolMotor};
+  TalonSRX m_backTriggerMotor{18}; 
+  TalonSRX* seven_seventies[2] = {&m_intakeSpinMotor, &m_backTriggerMotor};
 
   TalonFX m_rightShooterMotor{15};
   TalonFX m_leftShooterMotor{19};
@@ -106,6 +106,7 @@ struct Robot : public frc::TimedRobot {
       motor->ConfigFactoryDefault();
       motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 50, 50, 1});
       motor->ConfigStatorCurrentLimit(StatorCurrentLimitConfiguration{true,100,100,1.0});
+      motor->SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
     }
     for (TalonSRX* motor : seven_seventies) {
       motor->ConfigFactoryDefault();
@@ -120,8 +121,8 @@ struct Robot : public frc::TimedRobot {
 
     //m_rightShooterMotor.Follow(m_leftShooterMotor);
     //m_backShooterMotor.Follow(m_leftShooterMotor);
-    m_frontSpoolMotor.RestoreFactoryDefaults();
-    m_frontSpoolMotor.SetSmartCurrentLimit(30);
+    m_frontTriggerMotor.RestoreFactoryDefaults();
+    m_frontTriggerMotor.SetSmartCurrentLimit(30);
     m_leftFollowMotor.Follow(m_leftLeadMotor);
     m_rightFollowMotor.Follow(m_rightLeadMotor);
     
