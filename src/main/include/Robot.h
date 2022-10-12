@@ -1,5 +1,4 @@
 #pragma once
-
 #include <frc/TimedRobot.h>
 #include <frc/XboxController.h>
 #include <frc/drive/DifferentialDrive.h>
@@ -8,7 +7,6 @@
 #include <frc/smartdashboard/Smartdashboard.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/simulation/DifferentialDrivetrainSim.h>
-
 //limelight 💩
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
@@ -25,6 +23,8 @@
 #include <cmath>
 #include <algorithm>
 #include <string.h>
+#include <ctre/phoenix/music/Orchestra.h>
+
 struct Robot : public frc::TimedRobot {
   // Drive Motors
   static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
@@ -34,9 +34,9 @@ struct Robot : public frc::TimedRobot {
   rev::CANSparkMax m_rightFollowMotor{rightFollowDeviceID, rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax* DriveMotors[4]= {&m_leftLeadMotor, &m_rightLeadMotor, &m_leftFollowMotor, &m_rightFollowMotor};
   rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
-  rev::SparkMaxRelativeEncoder* DriveEncoders[4] = {&DriveMotors[0]->GetEncoder(),&DriveMotors[1]->GetEncoder(),&DriveMotors[2]->GetEncoder(),&DriveMotors[3]->GetEncoder()};  
+  rev::SparkMaxRelativeEncoder DriveEncoders[4] = {DriveMotors[0]->GetEncoder(),DriveMotors[1]->GetEncoder(),DriveMotors[2]->GetEncoder(),DriveMotors[3]->GetEncoder()};  
   frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
-  
+
   // Intake Motors
   //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
   TalonSRX m_intakeSpinMotor{14};
@@ -49,10 +49,11 @@ struct Robot : public frc::TimedRobot {
   TalonFX* Talons[3] = {&m_rightShooterMotor, &m_leftShooterMotor, &m_backShooterMotor};
   
   TalonFX m_intakeArm{20};
-  
+
   frc::XboxController m_driverController{0};
   frc::XboxController m_operatorController{1};
-
+  Orchestra orc;
+  
   //frc2::PIDController pid{kP, kI, kD};
 
 
@@ -109,6 +110,7 @@ struct Robot : public frc::TimedRobot {
       motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 50, 50, 1});
       motor->ConfigStatorCurrentLimit(StatorCurrentLimitConfiguration{true,100,100,1.0});
       motor->SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
+      //orc.AddInstrument(*motor);
     }
     for (TalonSRX* motor : seven_seventies) {
       motor->ConfigFactoryDefault();
@@ -120,9 +122,6 @@ struct Robot : public frc::TimedRobot {
     m_leftShooterMotor.SetInverted(true);
     m_rightShooterMotor.Follow(m_leftShooterMotor);
     m_backShooterMotor.Follow(m_leftShooterMotor);
-
-    //m_rightShooterMotor.Follow(m_leftShooterMotor);
-    //m_backShooterMotor.Follow(m_leftShooterMotor);
     m_frontTriggerMotor.RestoreFactoryDefaults();
     m_frontTriggerMotor.SetSmartCurrentLimit(30);
     m_leftFollowMotor.Follow(m_leftLeadMotor);
@@ -140,13 +139,7 @@ struct Robot : public frc::TimedRobot {
   void Intake(double speed) {
     m_intakeSpinMotor.Set(ctre::phoenix::motorcontrol::ControlMode{0}, speed);
   }
-  void Shoot(double speed) {
-    //m_intakeSpinMotor.Set(speed);
-    //m_intakeSpoolMotor.Set(TalonSRXControlMode{0}, -speed);
-    //m_frontSpoolMotor.Set(speed);
-    //m_rightShooterMotor.Set(ControlMode{0}, -speed);
-    //m_leftShooterMotor.Set(ControlMode{0}, -speed);
-    //m_backShooterMotor.Set(ControlMode{0}, -speed); 
+  void Shoot(double speed) { 
     m_leftShooterMotor.Set(ControlMode{0}, speed);
   }
   double AutoTargetTurn();
