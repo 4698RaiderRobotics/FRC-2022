@@ -7,6 +7,8 @@
 #include <frc/smartdashboard/Smartdashboard.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/simulation/DifferentialDrivetrainSim.h>
+#include <frc/DriverStation.h>
+
 
 //limelight 💩{
 #include <networktables/NetworkTable.h>
@@ -24,6 +26,7 @@
 #include <algorithm>
 #include <string.h>
 #include <ctre/phoenix/music/Orchestra.h>
+#include <AHRS.h>
 
 struct Robot : public frc::TimedRobot {
   // Drive Motors
@@ -52,7 +55,8 @@ struct Robot : public frc::TimedRobot {
   frc::XboxController m_driverController{0};
   frc::XboxController m_operatorController{1};
   Orchestra orc;
-  
+  //Gyro
+  AHRS *ahrs;
   //frc2::PIDController pid{kP, kI, kD};
 
 
@@ -140,6 +144,53 @@ struct Robot : public frc::TimedRobot {
   }
   void Shoot(double speed) { 
     m_leftShooterMotor.Set(ControlMode{0}, speed);
+  }
+  void get_gyro() {
+    if(!ahrs) {
+      return;
+    }
+    frc::SmartDashboard::PutBoolean("IMU_Connected", ahrs->IsConnected());
+    frc::SmartDashboard::PutNumber("IMU_Yaw", ahrs->GetYaw());
+    frc::SmartDashboard::PutNumber("IMU_Pitch", ahrs->GetPitch());
+    frc::SmartDashboard::PutNumber("IMU_Roll", ahrs->GetRoll());
+    frc::SmartDashboard::PutNumber("IMU_CompassHeading", ahrs->GetCompassHeading());
+    frc::SmartDashboard::PutNumber("IMU_Update_Count", ahrs->GetUpdateCount());
+    frc::SmartDashboard::PutNumber("IMU_Byte_Count", ahrs->GetByteCount());
+    frc::SmartDashboard::PutNumber("IMU_Timestamp", ahrs->GetLastSensorTimestamp());
+
+  /* These functions are compatible w/the WPI Gyro Class */
+    frc::SmartDashboard::PutNumber("IMU_TotalYaw", ahrs->GetAngle());
+    frc::SmartDashboard::PutNumber("IMU_YawRateDPS", ahrs->GetRate());
+
+    frc::SmartDashboard::PutNumber("IMU_Accel_X", ahrs->GetWorldLinearAccelX());
+    frc::SmartDashboard::PutNumber("IMU_Accel_Y", ahrs->GetWorldLinearAccelY());
+    frc::SmartDashboard::PutBoolean("IMU_IsMoving", ahrs->IsMoving());
+    frc::SmartDashboard::PutNumber("IMU_Temp_C", ahrs->GetTempC());
+    frc::SmartDashboard::PutBoolean("IMU_IsCalibrating", ahrs->IsCalibrating());
+
+    frc::SmartDashboard::PutNumber("Velocity_X", ahrs->GetVelocityX());
+    frc::SmartDashboard::PutNumber("Velocity_Y", ahrs->GetVelocityY());
+    frc::SmartDashboard::PutNumber("Displacement_X", ahrs->GetDisplacementX());
+    frc::SmartDashboard::PutNumber("Displacement_Y", ahrs->GetDisplacementY());
+
+  /* Omnimount Yaw Axis Information                                           */
+  /* For more info, see http://navx-mxp.kauailabs.com/installation/omnimount  */
+    AHRS::BoardYawAxis yaw_axis = ahrs->GetBoardYawAxis();
+    frc::SmartDashboard::PutString("YawAxisDirection", yaw_axis.up ? "Up" : "Down");
+    frc::SmartDashboard::PutNumber("YawAxis", yaw_axis.board_axis);
+
+  /* Sensor Board Information                                                 */
+    frc::SmartDashboard::PutString("FirmwareVersion", ahrs->GetFirmwareVersion());
+
+  /* Quaternion Data                                                          */
+  /* Quaternions are fascinating, and are the most compact representation of  */
+  /* orientation data.  All of the Yaw, Pitch and Roll Values can be derived  */
+  /* from the Quaternions.  If interested in motion processing, knowledge of  */
+  /* Quaternions is highly recommended.                                       */
+    frc::SmartDashboard::PutNumber("QuaternionW", ahrs->GetQuaternionW());
+    frc::SmartDashboard::PutNumber("QuaternionX", ahrs->GetQuaternionX());
+    frc::SmartDashboard::PutNumber("QuaternionY", ahrs->GetQuaternionY());
+    frc::SmartDashboard::PutNumber("QuaternionZ", ahrs->GetQuaternionZ());
   }
   double AutoTargetTurn();
   double DetermineDistance();

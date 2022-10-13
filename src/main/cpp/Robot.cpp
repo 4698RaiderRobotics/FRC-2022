@@ -5,7 +5,17 @@ void Robot::RobotInit() {
   SetupMotors();
   //camera
   frc::CameraServer::StartAutomaticCapture();
-  orc.LoadMusic("amongus.chrp");
+  
+  //orc.LoadMusic("amongus.chrp");
+  try
+  {
+    ahrs = new AHRS(frc::SPI::kMXP);
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << "Error Instatiating navX:\n" << e.what() << '\n';
+  }
+  
 }
 void Robot::RobotPeriodic() {
   tx = table->GetNumber("tx",0.0);
@@ -20,6 +30,7 @@ void Robot::RobotPeriodic() {
   for(int i=0; i<4; i++) {
     frc::SmartDashboard::PutNumber(std::to_string(i), DriveEncoders[i].GetPosition());
   }
+  get_gyro();
 
 }
 void Robot::AutonomousInit() {}
