@@ -43,7 +43,7 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("Intake Arm Selected Sensor position", m_intakeArm.GetSelectedSensorPosition());
   if(m_operatorController.GetXButton()) {
-    Intake(-0.6);
+    Intake(0.6);
   }
   else{
     Intake(0);
