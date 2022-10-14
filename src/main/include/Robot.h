@@ -40,8 +40,8 @@ struct Robot : public frc::TimedRobot {
   //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
   TalonSRX m_intakeSpinMotor{14};
   TalonSRX m_backTriggerMotor{18}; 
-  TalonSRX* seven_seventies[2] = {&m_intakeSpinMotor, &m_backTriggerMotor};
-
+  TalonSRX m_intakeWheel{21};
+  TalonSRX* seven_seventies[3] = {&m_intakeSpinMotor, &m_backTriggerMotor, &m_intakeWheel};
   TalonFX m_rightShooterMotor{15};
   TalonFX m_leftShooterMotor{19};
   TalonFX m_backShooterMotor{17};
@@ -121,6 +121,8 @@ struct Robot : public frc::TimedRobot {
     m_leftShooterMotor.SetInverted(true);
     m_rightShooterMotor.Follow(m_leftShooterMotor);
     m_backShooterMotor.Follow(m_leftShooterMotor);
+    m_intakeSpinMotor.SetInverted(true);
+    m_intakeWheel.Follow(m_intakeSpinMotor);
     m_frontTriggerMotor.RestoreFactoryDefaults();
     m_frontTriggerMotor.SetSmartCurrentLimit(30);
     m_leftFollowMotor.Follow(m_leftLeadMotor);

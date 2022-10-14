@@ -4,19 +4,13 @@
 void Robot::RobotInit() {
   SetupMotors();
   //camera
-  frc::CameraServer::StartAutomaticCapture();
-  orc.LoadMusic("amongus.chrp");
-}
+  frc::CameraServer::StartAutomaticCapture();}
 void Robot::RobotPeriodic() {
   tx = table->GetNumber("tx",0.0);
   ty = table->GetNumber("ty",0.0);
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
   //display motor encorers on shuffleboard/smartdashboard
-  /*std::for_each(DriveEncoders,DriveEncoders+4, [=](int i = 0){
-    frc::SmartDashboard::PutNumber(std::to_string(i), DriveEncoders[i]->GetPosition());
-    i++;
-  });*/
   for(int i=0; i<4; i++) {
     frc::SmartDashboard::PutNumber(std::to_string(i), DriveEncoders[i].GetPosition());
   }
@@ -32,7 +26,7 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("Intake Arm Selected Sensor position", m_intakeArm.GetSelectedSensorPosition());
   if(m_operatorController.GetXButton()) {
-    Intake(-0.6);
+    Intake(0.6);
   }
   else{
     Intake(0);
