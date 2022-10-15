@@ -14,6 +14,7 @@
 #include <networktables/NetworkTableEntry.h>
 #include <networktables/NetworkTableValue.h>
 //}
+#include <cstdio>
 #include <wpi/span.h>
 #include <iostream>
 #include <string.h>
@@ -48,11 +49,11 @@ struct Robot : public frc::TimedRobot {
   TalonFX* Talons[3] = {&m_rightShooterMotor, &m_leftShooterMotor, &m_backShooterMotor};
   
   TalonFX m_intakeArm{20};
-
+  TalonFX m_leftClimber{6};
+  TalonFX m_rightClimber{7};
   frc::XboxController m_driverController{0};
   frc::XboxController m_operatorController{1};
-  Orchestra orc;
-  
+
   //frc2::PIDController pid{kP, kI, kD};
 
 
@@ -124,11 +125,17 @@ struct Robot : public frc::TimedRobot {
     m_intakeSpinMotor.SetInverted(true);
     m_intakeWheel.Follow(m_intakeSpinMotor);
     m_frontTriggerMotor.RestoreFactoryDefaults();
+    //m_frontTriggerMotor.SetInverted(true);
     m_frontTriggerMotor.SetSmartCurrentLimit(30);
     m_leftFollowMotor.Follow(m_leftLeadMotor);
     m_rightFollowMotor.Follow(m_rightLeadMotor);
-    
-
+    m_backTriggerMotor.SetInverted(true);
+    m_leftClimber.SetNeutralMode(NeutralMode::Brake);
+    m_rightClimber.SetNeutralMode(NeutralMode::Brake);
+    for(rev::SparkMaxRelativeEncoder encoder:DriveEncoders) {
+      //1/7th
+      encoder.SetPositionConversionFactor(0.142857);
+    }
   
   }
   void DriveMethod(){
@@ -142,6 +149,11 @@ struct Robot : public frc::TimedRobot {
   }
   void Shoot(double speed) { 
     m_leftShooterMotor.Set(ControlMode{0}, speed);
+  }
+  void ResetEncoders() {
+    for (rev::SparkMaxRelativeEncoder encoder: DriveEncoders) {
+      encoder.SetPosition(0);
+    }
   }
   double AutoTargetTurn();
   double DetermineDistance();
