@@ -12,30 +12,56 @@ void Robot::RobotPeriodic() {
   ty = table->GetNumber("ty",0.0);
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
-  frc::SmartDashboard::PutNumber("flywheel", m_leftShooterMotor.GetSelectedSensorVelocity());
+  frc::SmartDashboard::PutNumber("flywheel speed", m_leftShooterMotor.GetSelectedSensorVelocity()* (60000/2048));
+  // Selected sensor Velocity -> rpm
+  //  units | 1000 ms | 1 rotation | 60 sec |
+  //  ms    | 1 sec   | 2048 units | 1 min |
+  // * (60,000/2048)
+
   //display motor encorers on shuffleboard/smartdashboard
 /*   for(int i=0; i<4; i++) {
     frc::SmartDashboard::PutNumber(std::to_string(i), DriveEncoders[i].GetPosition());
   } */
 
-
+  //frc::DriverStation::GetBatteryVoltage();
+  frc::SmartDashboard::PutNumber("rough game time", frc::DriverStation::GetMatchTime());
 }
 void Robot::AutonomousInit() {
+  table->PutNumber("pipeline", 0);  
   ResetEncoders();
+  //m_leftShooterMotor.Set(ControlMode::PercentOutput, 1);
+  m_leftShooterMotor.Set(ControlMode::PercentOutput, controller.Calculate(m_leftShooterMotor.GetSelectedSensorVelocity()*(60000/2048), 6000));
 }
 void Robot::AutonomousPeriodic() {
-  int rotations = 4;
+  correction = 0;
+/*   if(AutoTargetTurn() != 0) {
+    correction = AutoTargetTurn();
+  } */
+  int rotations = 7;
   if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
-    m_robotDrive.ArcadeDrive(0, 0.5);
+    //pretty sure Arcade Drive function rotation and speed are flipped for somereason
+    m_robotDrive.ArcadeDrive(0, 0.7);
   }
+/*   if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
+    //pretty sure Arcade Drive function rotation and speed are flipped for somereason
+    m_robotDrive.ArcadeDrive(0.7, correction);
+  } */
+/*   if(m_leftShooterMotor.GetSelectedSensorVelocity() > 5000) {
+    m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
+    m_frontTriggerMotor.Set(1.0);
+  } */
 }
 void Robot::TeleopInit() {
+  m_leftShooterMotor.Set(ControlMode::PercentOutput, 0);
+  m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
+  m_frontTriggerMotor.Set(0);
   ResetEncoders();
-  table->PutNumber("pipline", 2);
+  table->PutNumber("pipeline", 2);
 
 }
 void Robot::TeleopPeriodic() {
-  frc::SmartDashboard::PutNumber("Intake Arm Selected Sensor position", m_intakeArm.GetSelectedSensorPosition());
+  frc::SmartDashboard::PutNumber("Target Distance", DetermineDistance());
+  
   if(m_operatorController.GetXButton()) {
     Intake(1);
     //m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
@@ -61,8 +87,6 @@ void Robot::TeleopPeriodic() {
     m_frontTriggerMotor.Set(0.0);
   }
   if(m_operatorController.GetRightBumper()) {
-    double velocity = m_intakeArm.GetSelectedSensorVelocity();
-    frc::SmartDashboard::PutNumber("Arm Velocity", velocity);
     m_intakeArm.Set(ControlMode::PercentOutput, 0.2);
     //m_intakeArm.Set(ControlMode::Position)'
     //64:1
@@ -73,16 +97,19 @@ void Robot::TeleopPeriodic() {
   else{
     m_intakeArm.Set(ControlMode::PercentOutput, 0);
   }
+  if(m_driverController.GetAButtonPressed()) {
+    table->PutNumber("pipeline", 0);  
+  }
   if (m_driverController.GetAButton()) {
-    AutoTargetTurn();
+    correction = AutoTargetTurn();
   }
   if (m_driverController.GetAButtonReleased()) {
-    table->PutNumber("pipline", 2);
+    table->PutNumber("pipeline", 2);
   }
-  if (m_driverController.GetRightBumper()) {
+  if (m_driverController.GetRightY() > 0.4) {
     m_rightClimber.Set(ControlMode::PercentOutput, 0.5);
   }
-  else if (m_driverController.GetLeftBumper()) {
+  else if (m_driverController.GetRightY() < -0.4) {
     m_rightClimber.Set(ControlMode::PercentOutput, -0.5);
   }
   else {
@@ -108,12 +135,10 @@ void Robot::TestInit() {}
 void Robot::TestPeriodic() {}
 void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
-double Robot::AutoTargetTurn(){
-  table->PutNumber("pipeline", 0);
-  
+double Robot::AutoTargetTurn(){  
   float heading_error = -tx;
   steeringadjust = 0.0f;
-  printf("tx: %f",tx);
+  frc::SmartDashboard::PutNumber("tx", heading_error);
   if (tx > 1.0) {
     //steeringadjust = (tx * -0.025) - 0.15;
     //steeringadjust = -0.5;

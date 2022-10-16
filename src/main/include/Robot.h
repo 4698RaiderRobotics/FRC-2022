@@ -7,12 +7,11 @@
 #include <frc/smartdashboard/Smartdashboard.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/simulation/DifferentialDrivetrainSim.h>
-
-//limelight 💩{
+#include <frc/DriverStation.h>
+#include <networktables/NetworkTableValue.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTableEntry.h>
-#include <networktables/NetworkTableValue.h>
 //}
 #include <cstdio>
 #include <wpi/span.h>
@@ -25,6 +24,8 @@
 #include <algorithm>
 #include <string.h>
 #include <ctre/phoenix/music/Orchestra.h>
+#include <frc/controller/SimpleMotorFeedforward.h>
+#include <frc/controller/BangBangController.h>
 
 struct Robot : public frc::TimedRobot {
   // Drive Motors
@@ -53,10 +54,8 @@ struct Robot : public frc::TimedRobot {
   TalonFX m_rightClimber{7};
   frc::XboxController m_driverController{0};
   frc::XboxController m_operatorController{1};
-
+  frc::BangBangController controller;
   //frc2::PIDController pid{kP, kI, kD};
-
-
   double L = 2;
   double K = 0.8;
   double x_0 = 0;  
@@ -70,8 +69,9 @@ struct Robot : public frc::TimedRobot {
   double ta;
   // Target Skew
   double ts;
+  double correction;
   float kp = -0.1f;
-  float min_command = 0.5f;
+  float min_command = 0.05f;
  // https://docs.limelightvision.io/en/latest/_images/DistanceEstimation.jpg
   double h_1; // hieght of camera above the floor
   double h_2; // hieght of reflective target
@@ -79,6 +79,10 @@ struct Robot : public frc::TimedRobot {
   double theta_2; // angle of the camera to targ  et (theta_2 = ty)
   double d; // distance to target (lol) (should be returned by DetermineDistance())
   double steeringadjust;
+  // Create a new SimpleMotorFeedforward with gains kS, kV, and kA
+  // Distance is measured in meters
+  //Find kS, kV, kA experimentally with sysID
+
 
   void RobotInit() override;
   void RobotPeriodic() override;
@@ -136,13 +140,23 @@ struct Robot : public frc::TimedRobot {
       //1/7th
       encoder.SetPositionConversionFactor(0.142857);
     }
+/*     units::voltage::volt_t ks{0.5};
+    auto kV = units::volt_t{1} * units::second_t{1} / units::meter_t{1};
+    auto kA = units::volt_t{1} * units::second_t{1} * units::second_t{1} / units::meter_t{1}; 
+    frc::SimpleMotorFeedforward<units::meters> feedforward(ks, kV, kA); */
+
   
   }
   void DriveMethod(){
     //Forza™️ Controls:
-    m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
-    m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetLeftTriggerAxis());
-    m_robotDrive.ArcadeDrive(-m_driverController.GetLeftX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
+    if(m_driverController.GetAButton()){
+      m_robotDrive.ArcadeDrive(0, steeringadjust);
+    }
+    else {
+      m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
+      m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetLeftTriggerAxis());
+      m_robotDrive.ArcadeDrive(-m_driverController.GetLeftX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
+    }
   }
   void Intake(double speed) {
     m_intakeSpinMotor.Set(ctre::phoenix::motorcontrol::ControlMode{0}, speed);
