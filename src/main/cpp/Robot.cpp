@@ -6,15 +6,23 @@ void Robot::RobotInit() {
   //camera
   frc::CameraServer::StartAutomaticCapture();
   ResetEncoders();
+  //frc::SmartDashboard::PutNumber("rpm_target", 6000);
+
 }
 void Robot::RobotPeriodic() {
+  //Rainbow();
+  //m_led.SetData(m_ledBuffer);
   tx = table->GetNumber("tx",0.0);
   ty = table->GetNumber("ty",0.0);
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
-  frc::SmartDashboard::PutNumber("flywheel speed", m_leftShooterMotor.GetSelectedSensorVelocity()* (60000/2048));
+  double current_target_speed = frc::SmartDashboard::GetNumber("rpm_target", 6000);
+  frc::SmartDashboard::PutNumber("current target speed", current_target_speed);
+  double display_velocity = m_leftShooterMotor.GetSelectedSensorVelocity()*0.29296875;
+  frc::SmartDashboard::PutNumber("wheel_speed", display_velocity);
+  //frc::SmartDashboard::PutNumber("flywheel speed", m_leftShooterMotor.GetSelectedSensorVelocity()* (600/2048));
   // Selected sensor Velocity -> rpm
-  //  units | 1000 ms | 1 rotation | 60 sec |
+  //  units 100ms | 1000 ms | 1 rotation | 60 sec |
   //  ms    | 1 sec   | 2048 units | 1 min |
   // * (60,000/2048)
 
@@ -22,15 +30,16 @@ void Robot::RobotPeriodic() {
 /*   for(int i=0; i<4; i++) {
     frc::SmartDashboard::PutNumber(std::to_string(i), DriveEncoders[i].GetPosition());
   } */
-
   //frc::DriverStation::GetBatteryVoltage();
   frc::SmartDashboard::PutNumber("rough game time", frc::DriverStation::GetMatchTime());
 }
 void Robot::AutonomousInit() {
   table->PutNumber("pipeline", 0);  
   ResetEncoders();
+  frc::SmartDashboard::PutNumber("rpm_target", 2000);
+
   //m_leftShooterMotor.Set(ControlMode::PercentOutput, 1);
-  m_leftShooterMotor.Set(ControlMode::PercentOutput, controller.Calculate(m_leftShooterMotor.GetSelectedSensorVelocity()*(60000/2048), 6000));
+  //m_leftShooterMotor.Set(ControlMode::PercentOutput, controller.Calculate(m_leftShooterMotor.GetSelectedSensorVelocity()*(60000/2048), 6000));
 }
 void Robot::AutonomousPeriodic() {
   correction = 0;
@@ -52,16 +61,20 @@ void Robot::AutonomousPeriodic() {
   } */
 }
 void Robot::TeleopInit() {
+  SetupMotors();
+  //testing ↘️⬇️
+  table->PutNumber("pipeline", 0);
   m_leftShooterMotor.Set(ControlMode::PercentOutput, 0);
   m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
   m_frontTriggerMotor.Set(0);
   ResetEncoders();
-  table->PutNumber("pipeline", 2);
+  //table->PutNumber("pipeline", 2);
 
 }
 void Robot::TeleopPeriodic() {
+  frc::SmartDashboard::PutNumber("raw_flywheel_speed", m_leftShooterMotor.GetSelectedSensorVelocity());
+  //double wheel_velocity = m_leftShooterMotor.GetSelectedSensorVelocity();
   frc::SmartDashboard::PutNumber("Target Distance", DetermineDistance());
-  
   if(m_operatorController.GetXButton()) {
     Intake(1);
     //m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
@@ -71,10 +84,13 @@ void Robot::TeleopPeriodic() {
     Intake(0);
   }
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
-    Shoot(1.0); 
+    std::cout << frc::SmartDashboard::GetNumber("rpm_target", 6000);
+    //Shoot(frc::SmartDashboard::GetNumber("rpm_target", 6000)); 
+    Shoot(2000, &m_leftShooterMotor); 
+
   }
   else {
-    Shoot(0.0);
+    Shoot(0, &m_leftShooterMotor);
   }
   if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
@@ -104,7 +120,7 @@ void Robot::TeleopPeriodic() {
     correction = AutoTargetTurn();
   }
   if (m_driverController.GetAButtonReleased()) {
-    table->PutNumber("pipeline", 2);
+    //table->PutNumber("pipeline", 2);
   }
   if (m_driverController.GetRightY() > 0.4) {
     m_rightClimber.Set(ControlMode::PercentOutput, 0.5);
@@ -131,8 +147,11 @@ void Robot::TeleopPeriodic() {
 
 void Robot::DisabledInit() {}
 void Robot::DisabledPeriodic() {}
-void Robot::TestInit() {}
-void Robot::TestPeriodic() {}
+void Robot::TestInit() {
+}
+void Robot::TestPeriodic() {
+  m_leftShooterMotor.Set(ControlMode::PercentOutput, controller.Calculate(m_leftShooterMotor.GetSelectedSensorVelocity()*(600/2048), 6000));
+}
 void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
 double Robot::AutoTargetTurn(){  

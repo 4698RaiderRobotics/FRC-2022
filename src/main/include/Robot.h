@@ -1,4 +1,6 @@
 #pragma once
+#include "./pid.h"
+
 #include <frc/TimedRobot.h>
 #include <frc/XboxController.h>
 #include <frc/drive/DifferentialDrive.h>
@@ -13,6 +15,8 @@
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTableEntry.h>
 //}
+
+#include <array>
 #include <cstdio>
 #include <wpi/span.h>
 #include <iostream>
@@ -26,8 +30,17 @@
 #include <ctre/phoenix/music/Orchestra.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/controller/BangBangController.h>
+#include <frc/AddressableLED.h>
 
+// units {
+#include <units/angular_velocity.h>
+#include <units/voltage.h>
+#include <units/length.h>
+#include <units/acceleration.h>
+//}
+//template <class Distance>
 struct Robot : public frc::TimedRobot {
+
   // Drive Motors
   static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
   rev::CANSparkMax m_leftLeadMotor{leftLeadDeviceID, rev::CANSparkMax::MotorType::kBrushless};
@@ -52,10 +65,9 @@ struct Robot : public frc::TimedRobot {
   TalonFX m_intakeArm{20};
   TalonFX m_leftClimber{6};
   TalonFX m_rightClimber{7};
-  frc::XboxController m_driverController{0};
+  frc::XboxController m_driverController{0};  
   frc::XboxController m_operatorController{1};
   frc::BangBangController controller;
-  //frc2::PIDController pid{kP, kI, kD};
   double L = 2;
   double K = 0.8;
   double x_0 = 0;  
@@ -70,8 +82,8 @@ struct Robot : public frc::TimedRobot {
   // Target Skew
   double ts;
   double correction;
-  float kp = -0.1f;
-  float min_command = 0.05f;
+  float kp = 0.05f;
+  float min_command = 0.01f;
  // https://docs.limelightvision.io/en/latest/_images/DistanceEstimation.jpg
   double h_1; // hieght of camera above the floor
   double h_2; // hieght of reflective target
@@ -82,7 +94,6 @@ struct Robot : public frc::TimedRobot {
   // Create a new SimpleMotorFeedforward with gains kS, kV, and kA
   // Distance is measured in meters
   //Find kS, kV, kA experimentally with sysID
-
 
   void RobotInit() override;
   void RobotPeriodic() override;
@@ -110,9 +121,9 @@ struct Robot : public frc::TimedRobot {
       motor->SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
     }
     for (TalonFX* motor : Talons) {
-      motor->ConfigFactoryDefault();
-      motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 50, 50, 1});
-      motor->ConfigStatorCurrentLimit(StatorCurrentLimitConfiguration{true,100,100,1.0});
+      //motor->ConfigFactoryDefault();
+      motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 40, 50, 1});
+      motor->ConfigStatorCurrentLimit(StatorCurrentLimitConfiguration{true,80,100,1.0});
       motor->SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
       //orc.AddInstrument(*motor);
     }
@@ -125,7 +136,9 @@ struct Robot : public frc::TimedRobot {
     m_backShooterMotor.SetInverted(true);
     m_leftShooterMotor.SetInverted(true);
     m_rightShooterMotor.Follow(m_leftShooterMotor);
-    m_backShooterMotor.Follow(m_leftShooterMotor);
+    SetupPID(&m_leftShooterMotor);
+    //we disabled this for tuning [todo fix ]
+    //m_backShooterMotor.Follow(m_leftShooterMotor);
     m_intakeSpinMotor.SetInverted(true);
     m_intakeWheel.Follow(m_intakeSpinMotor);
     m_frontTriggerMotor.RestoreFactoryDefaults();
@@ -150,7 +163,7 @@ struct Robot : public frc::TimedRobot {
   void DriveMethod(){
     //Forza™️ Controls:
     if(m_driverController.GetAButton()){
-      m_robotDrive.ArcadeDrive(0, steeringadjust);
+      m_robotDrive.ArcadeDrive(steeringadjust, 0);
     }
     else {
       m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
@@ -161,9 +174,7 @@ struct Robot : public frc::TimedRobot {
   void Intake(double speed) {
     m_intakeSpinMotor.Set(ctre::phoenix::motorcontrol::ControlMode{0}, speed);
   }
-  void Shoot(double speed) { 
-    m_leftShooterMotor.Set(ControlMode{0}, speed);
-  }
+
   void ResetEncoders() {
     for (rev::SparkMaxRelativeEncoder encoder: DriveEncoders) {
       encoder.SetPosition(0);
