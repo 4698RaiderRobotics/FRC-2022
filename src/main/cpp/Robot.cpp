@@ -24,7 +24,7 @@ void Robot::RobotPeriodic() {
   // Selected sensor Velocity -> rpm
   //  units 100ms | 1000 ms | 1 rotation | 60 sec |
   //  ms    | 1 sec   | 2048 units | 1 min |
-  // * (60,000/2048)
+  // * (600/2048)
 
   //display motor encorers on shuffleboard/smartdashboard
 /*   for(int i=0; i<4; i++) {
@@ -75,14 +75,9 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("raw_flywheel_speed", m_leftShooterMotor.GetSelectedSensorVelocity());
   //double wheel_velocity = m_leftShooterMotor.GetSelectedSensorVelocity();
   frc::SmartDashboard::PutNumber("Target Distance", DetermineDistance());
-
   Intake(m_operatorController.GetXButton());
-  if(m_operatorController.GetRightTriggerAxis() > 0.5) {
-    Shoot(2000, &m_leftShooterMotor); 
-  }
-  else {
-    Shoot(0, &m_leftShooterMotor);
-  }
+  if(m_operatorController.GetRightTriggerAxis() > 0.5) {Shoot(2000, &m_leftShooterMotor);}
+    else {Shoot(0, &m_leftShooterMotor);}
   Bind(m_operatorController.GetLeftTriggerAxis() > 0.5, [=] () {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
     m_frontTriggerMotor.Set(1.0);
@@ -95,44 +90,20 @@ void Robot::TeleopPeriodic() {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 0.0);
   }
   m_frontTriggerMotor.Set(m_operatorController.GetLeftTriggerAxis() < 0.5);
-  if(m_operatorController.GetRightBumper()) {
-    m_intakeArm.Set(ControlMode::PercentOutput, 0.2);
-    //m_intakeArm.Set(ControlMode::Position)'
-    //64:1
-  }
-  else if(m_operatorController.GetLeftBumper()) {
-    m_intakeArm.Set(ControlMode::PercentOutput, -0.2);
-  }
-  else{
-    m_intakeArm.Set(ControlMode::PercentOutput, 0);
-  }
-  if(m_driverController.GetAButtonPressed()) {
-    table->PutNumber("pipeline", 0);  
-  }
-  if (m_driverController.GetAButton()) {
-    correction = AutoTargetTurn();
-  }
+  if(m_operatorController.GetRightBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, 0.2);}
+    else if(m_operatorController.GetLeftBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, -0.2);}
+      else{m_intakeArm.Set(ControlMode::PercentOutput, 0);}
+  if(m_driverController.GetAButtonPressed()) {table->PutNumber("pipeline", 0);}
+  if (m_driverController.GetAButton()) {correction = AutoTargetTurn();}
   if (m_driverController.GetAButtonReleased()) {
-    //table->PutNumber("pipeline", 2);
+  //table->PutNumber("pipeline", 2);
   }
-  if (m_driverController.GetRightY() > 0.4) {
-    m_rightClimber.Set(ControlMode::PercentOutput, 0.5);
-  }
-  else if (m_driverController.GetRightY() < -0.4) {
-    m_rightClimber.Set(ControlMode::PercentOutput, -0.5);
-  }
-  else {
-    m_rightClimber.Set(ControlMode::PercentOutput, 0);
-  }
-  if (m_driverController.GetPOV() == 0) {
-    m_leftClimber.Set(ControlMode::PercentOutput, 0.5);
-  }
-  else if (m_driverController.GetPOV() == 180) {
-    m_leftClimber.Set(ControlMode::PercentOutput, -0.5);
-  }
-  else {
-    m_leftClimber.Set(ControlMode::PercentOutput, 0);
-  }
+  if (m_driverController.GetRightY() > 0.4) {m_rightClimber.Set(ControlMode::PercentOutput, 0.5);}
+    else if (m_driverController.GetRightY() < -0.4) {m_rightClimber.Set(ControlMode::PercentOutput, -0.5);}
+      else {m_rightClimber.Set(ControlMode::PercentOutput, 0);}
+  if (m_driverController.GetPOV() == 0) {m_leftClimber.Set(ControlMode::PercentOutput, 0.5);}
+    else if (m_driverController.GetPOV() == 180) {m_leftClimber.Set(ControlMode::PercentOutput, -0.5);}
+      else {m_leftClimber.Set(ControlMode::PercentOutput, 0);}
   DriveMethod();
 
 
