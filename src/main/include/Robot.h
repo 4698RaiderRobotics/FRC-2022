@@ -180,6 +180,12 @@ struct Robot : public frc::TimedRobot {
       encoder.SetPosition(0);
     }
   }
+  template<typename _Function>
+  void Bind(bool buttonstate, _Function __F) {
+    if(buttonstate) {
+      __F();
+    }
+  }
   double AutoTargetTurn();
   double DetermineDistance();
   frc::Field2d m_fieldSim;
