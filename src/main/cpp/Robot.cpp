@@ -75,33 +75,26 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("raw_flywheel_speed", m_leftShooterMotor.GetSelectedSensorVelocity());
   //double wheel_velocity = m_leftShooterMotor.GetSelectedSensorVelocity();
   frc::SmartDashboard::PutNumber("Target Distance", DetermineDistance());
-  if(m_operatorController.GetXButton()) {
-    Intake(1);
-    //m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
 
-  }
-  else{
-    Intake(0);
-  }
+  Intake(m_operatorController.GetXButton());
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
-    std::cout << frc::SmartDashboard::GetNumber("rpm_target", 6000);
-    //Shoot(frc::SmartDashboard::GetNumber("rpm_target", 6000)); 
     Shoot(2000, &m_leftShooterMotor); 
-
   }
   else {
     Shoot(0, &m_leftShooterMotor);
   }
-  if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
+  Bind(m_operatorController.GetLeftTriggerAxis() > 0.5, [=] () {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
     m_frontTriggerMotor.Set(1.0);
-  } 
-  else if ((m_operatorController.GetLeftTriggerAxis() < 0.5) && !m_operatorController.GetXButton()) {
+  });
+/*   if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
+    m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
+    m_frontTriggerMotor.Set(1.0);
+  }  */
+  if ((m_operatorController.GetLeftTriggerAxis() < 0.5) && !m_operatorController.GetXButton()) {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 0.0);
   }
-  if(m_operatorController.GetLeftTriggerAxis() < 0.5) {
-    m_frontTriggerMotor.Set(0.0);
-  }
+  m_frontTriggerMotor.Set(m_operatorController.GetLeftTriggerAxis() < 0.5);
   if(m_operatorController.GetRightBumper()) {
     m_intakeArm.Set(ControlMode::PercentOutput, 0.2);
     //m_intakeArm.Set(ControlMode::Position)'
