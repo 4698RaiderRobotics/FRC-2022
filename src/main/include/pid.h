@@ -9,7 +9,7 @@ void SetupPID(TalonFX* motor) {
     //f-gain: (100% * 1023 / [measured velocity] ) 
     frc::SmartDashboard::SetDefaultNumber("kF", 0.0465);
     frc::SmartDashboard::SetDefaultNumber("kP", 0);
-
+    
 //    motor->Config_kF(1, 0.5);
 //https://docs.ctre-phoenix.com/en/latest/ch16_ClosedLoop.html#velocity-closed-loop-control-mode
 }

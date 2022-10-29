@@ -9,6 +9,17 @@ void Robot::RobotInit() {
   ResetEncoders();
   SetupPID(&m_leftShooterMotor);
   //frc::SmartDashboard::PutNumber("rpm_target", 6000);
+  
+  //orc.LoadMusic("amongus.chrp");
+  try
+  {
+    ahrs = new AHRS(frc::SPI::kMXP);
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << "Error Instatiating navX:\n" << e.what() << '\n';
+  }
+  
 }
 void Robot::RobotPeriodic() {
   PIDTuner(&m_leftShooterMotor, setpoint);
@@ -43,6 +54,8 @@ void Robot::AutonomousPeriodic() {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
     m_frontTriggerMotor.Set(1.0);
   } */
+  get_gyro();
+
 }
 void Robot::TeleopInit() {
   frc::SmartDashboard::SetDefaultNumber("backspin", 0.8);
