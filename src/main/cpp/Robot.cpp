@@ -3,41 +3,25 @@
 // implement https://docs.wpilib.org/en/latest/docs/software/pathplanning/trajectory-tutorial/index.html
 void Robot::RobotInit() {
   SetupMotors();
+
   //camera
   frc::CameraServer::StartAutomaticCapture();
   ResetEncoders();
+  SetupPID(&m_leftShooterMotor);
   //frc::SmartDashboard::PutNumber("rpm_target", 6000);
-
 }
 void Robot::RobotPeriodic() {
-  //Rainbow();
-  //m_led.SetData(m_ledBuffer);
+  PIDTuner(&m_leftShooterMotor, setpoint);
   tx = table->GetNumber("tx",0.0);
   ty = table->GetNumber("ty",0.0);
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
-  double current_target_speed = frc::SmartDashboard::GetNumber("rpm_target", 6000);
-  frc::SmartDashboard::PutNumber("current target speed", current_target_speed);
   double display_velocity = m_leftShooterMotor.GetSelectedSensorVelocity()*0.29296875;
   frc::SmartDashboard::PutNumber("wheel_speed", display_velocity);
-  //frc::SmartDashboard::PutNumber("flywheel speed", m_leftShooterMotor.GetSelectedSensorVelocity()* (600/2048));
-  // Selected sensor Velocity -> rpm
-  //  units 100ms | 1000 ms | 1 rotation | 60 sec |
-  //  ms    | 1 sec   | 2048 units | 1 min |
-  // * (600/2048)
-
-  //display motor encorers on shuffleboard/smartdashboard
-/*   for(int i=0; i<4; i++) {
-    frc::SmartDashboard::PutNumber(std::to_string(i), DriveEncoders[i].GetPosition());
-  } */
-  //frc::DriverStation::GetBatteryVoltage();
-  frc::SmartDashboard::PutNumber("rough game time", frc::DriverStation::GetMatchTime());
 }
 void Robot::AutonomousInit() {
   table->PutNumber("pipeline", 0);  
   ResetEncoders();
-  frc::SmartDashboard::PutNumber("rpm_target", 2000);
-
   //m_leftShooterMotor.Set(ControlMode::PercentOutput, 1);
   //m_leftShooterMotor.Set(ControlMode::PercentOutput, controller.Calculate(m_leftShooterMotor.GetSelectedSensorVelocity()*(60000/2048), 6000));
 }
@@ -61,27 +45,40 @@ void Robot::AutonomousPeriodic() {
   } */
 }
 void Robot::TeleopInit() {
+  frc::SmartDashboard::SetDefaultNumber("backspin", 0.8);
+  frc::SmartDashboard::SetDefaultNumber("triggerspeed", 2000);
   SetupMotors();
   //testing ↘️⬇️
   table->PutNumber("pipeline", 0);
   m_leftShooterMotor.Set(ControlMode::PercentOutput, 0);
   m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
-  m_frontTriggerMotor.Set(0);
-  ResetEncoders();
+    m_frontTriggerMotor.Set(0);
+    ResetEncoders();
   //table->PutNumber("pipeline", 2);
 
 }
 void Robot::TeleopPeriodic() {
+  Shoot(setpoint, &m_leftShooterMotor, &m_backShooterMotor);
   frc::SmartDashboard::PutNumber("raw_flywheel_speed", m_leftShooterMotor.GetSelectedSensorVelocity());
   //double wheel_velocity = m_leftShooterMotor.GetSelectedSensorVelocity();
   frc::SmartDashboard::PutNumber("Target Distance", DetermineDistance());
-  Intake(m_operatorController.GetXButton());
-  if(m_operatorController.GetRightTriggerAxis() > 0.5) {Shoot(2000, &m_leftShooterMotor);}
-    else {Shoot(0, &m_leftShooterMotor);}
-  Bind(m_operatorController.GetLeftTriggerAxis() > 0.5, [=] () {
+  if(m_operatorController.GetXButton()) {
+    Intake(0.8);
+  }
+  else if (m_operatorController.GetPOV() == 270) {
+    Intake(-0.8);
+  }
+  else {
+    Intake(0);
+  }
+  if(m_operatorController.GetRightTriggerAxis() > 0.5) {
+    setpoint=frc::SmartDashboard::GetNumber("triggerspeed", 2000)*3.4133333333333336;
+  }
+  else {setpoint=0;}
+  if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
     m_frontTriggerMotor.Set(1.0);
-  });
+  }
 /*   if(m_operatorController.GetLeftTriggerAxis() > 0.5) {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
     m_frontTriggerMotor.Set(1.0);
@@ -89,7 +86,13 @@ void Robot::TeleopPeriodic() {
   if ((m_operatorController.GetLeftTriggerAxis() < 0.5) && !m_operatorController.GetXButton()) {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 0.0);
   }
-  m_frontTriggerMotor.Set(m_operatorController.GetLeftTriggerAxis() < 0.5);
+  if (m_operatorController.GetLeftTriggerAxis() > 0.5) {m_frontTriggerMotor.Set(1);}
+  else if(m_operatorController.GetPOV() == 180) {
+    m_frontTriggerMotor.Set(-1);
+  }
+  else {
+    m_frontTriggerMotor.Set(0);
+  }
   if(m_operatorController.GetRightBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, 0.2);}
     else if(m_operatorController.GetLeftBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, -0.2);}
       else{m_intakeArm.Set(ControlMode::PercentOutput, 0);}

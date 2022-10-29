@@ -68,6 +68,9 @@ struct Robot : public frc::TimedRobot {
   frc::XboxController m_driverController{0};  
   frc::XboxController m_operatorController{1};
   frc::BangBangController controller;
+  double setpoint = 0;
+  double kF;
+  double kP;
   double L = 2;
   double K = 0.8;
   double x_0 = 0;  
@@ -121,8 +124,8 @@ struct Robot : public frc::TimedRobot {
       motor->SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
     }
     for (TalonFX* motor : Talons) {
-      //motor->ConfigFactoryDefault();
-      motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 40, 50, 1});
+      motor->ConfigFactoryDefault();
+      motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 30, 40, 1});
       motor->ConfigStatorCurrentLimit(StatorCurrentLimitConfiguration{true,80,100,1.0});
       motor->SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
       //orc.AddInstrument(*motor);
