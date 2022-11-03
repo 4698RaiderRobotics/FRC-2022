@@ -3,6 +3,7 @@
 
 #include <frc/TimedRobot.h>
 #include <frc/XboxController.h>
+#include <frc/PS4Controller.h>
 #include <frc/drive/DifferentialDrive.h>
 #include <rev/CANSparkMax.h>
 #include <ctre/Phoenix.h>
@@ -43,12 +44,12 @@
 //}
 //template <class Distance>
 #include <AHRS.h>
+
 #include <frc/drive/DifferentialDrive.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
 #include <frc/kinematics/DifferentialDriveWheelSpeeds.h>
 #include <frc/geometry/Rotation2d.h>
-#include <units/length.h>
 struct Robot : public frc::TimedRobot {
 
   // Drive Motors
@@ -75,7 +76,8 @@ struct Robot : public frc::TimedRobot {
   TalonFX m_intakeArm{20};
   TalonFX m_leftClimber{6};
   TalonFX m_rightClimber{7};
-  frc::XboxController m_driverController{0};  
+  //frc::XboxController m_driverController{0};  
+  frc::PS4Controller m_driverController{0};
   frc::XboxController m_operatorController{1};
   frc::BangBangController controller;
   double setpoint = 0;
@@ -85,6 +87,8 @@ struct Robot : public frc::TimedRobot {
   AHRS *ahrs;
   //frc2::PIDController pid{kP, kI, kD};
   frc::DifferentialDriveOdometry m_odometry;
+  frc::Field2d m_field;
+
   double L = 2;
   double K = 0.8;
   double x_0 = 0;  
@@ -178,13 +182,13 @@ struct Robot : public frc::TimedRobot {
   }
   void DriveMethod(){
     //Forza™️ Controls:
-    if(m_driverController.GetAButton()){
+    if(m_driverController.GetCrossButton()){
       m_robotDrive.ArcadeDrive(steeringadjust, 0);
     }
     else {
-      m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetRightTriggerAxis());
-      m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetLeftTriggerAxis());
-      m_robotDrive.ArcadeDrive(-m_driverController.GetLeftX()*0.75,m_driverController.GetLeftTriggerAxis()-m_driverController.GetRightTriggerAxis());
+      m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetR2Axis());
+      m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetL2Axis());
+      m_robotDrive.ArcadeDrive(-m_driverController.GetLeftX()*0.75,m_driverController.GetL2Axis()-m_driverController.GetR2Axis());
     }
   }
   void Intake(double speed) {
@@ -251,6 +255,4 @@ struct Robot : public frc::TimedRobot {
   }
   double AutoTargetTurn();
   double DetermineDistance();
-  frc::Field2d m_fieldSim;
-
 };

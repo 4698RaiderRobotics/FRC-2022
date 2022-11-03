@@ -5,6 +5,7 @@
 void Robot::RobotInit() {
   SetupMotors();
   m_odometry = setupOdometry(&DriveEncoders[0], &DriveEncoders[2], ahrs);
+  frc::SmartDashboard::PutData("Field", &m_field);
   //camera
   frc::CameraServer::StartAutomaticCapture();
   ResetEncoders();
@@ -36,6 +37,7 @@ void Robot::RobotPeriodic() {
   units::length::meter_t left{DriveEncoders[0].GetPosition()*diameter*wpi::numbers::pi};
   units::length::meter_t right{DriveEncoders[2].GetPosition()*diameter*wpi::numbers::pi};
   m_odometry.Update(gyro_angle, left, right);
+  m_field.SetRobotPose(m_odometry.GetPose());
 }
 void Robot::AutonomousInit() {
   table->PutNumber("pipeline", 0);  
@@ -116,9 +118,9 @@ void Robot::TeleopPeriodic() {
   if(m_operatorController.GetRightBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, 0.2);}
     else if(m_operatorController.GetLeftBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, -0.2);}
       else{m_intakeArm.Set(ControlMode::PercentOutput, 0);}
-  if(m_driverController.GetAButtonPressed()) {table->PutNumber("pipeline", 0);}
-  if (m_driverController.GetAButton()) {correction = AutoTargetTurn();}
-  if (m_driverController.GetAButtonReleased()) {
+  if(m_driverController.GetCrossButtonPressed()) {table->PutNumber("pipeline", 0);}
+  if (m_driverController.GetCrossButton()) {correction = AutoTargetTurn();}
+  if (m_driverController.GetCrossButtonReleased()) {
   //table->PutNumber("pipeline", 2);
   }
   if (m_driverController.GetRightY() > 0.4) {m_rightClimber.Set(ControlMode::PercentOutput, 0.5);}

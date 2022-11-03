@@ -1,5 +1,5 @@
 #include "Robot.h"
-auto setupOdometry(rev::SparkMaxRelativeEncoder* LeftEncoder, rev::SparkMaxRelativeEncoder* RightEncoder, AHRS* gyro) {
+frc::DifferentialDriveOdometry setupOdometry(rev::SparkMaxRelativeEncoder* LeftEncoder, rev::SparkMaxRelativeEncoder* RightEncoder, AHRS* gyro) {
     LeftEncoder->SetPosition(0);
     RightEncoder->SetPosition(0);
     gyro->Reset();
