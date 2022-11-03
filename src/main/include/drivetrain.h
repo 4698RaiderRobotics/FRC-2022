@@ -12,6 +12,8 @@
 #include <AHRS.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
 #include <frc/geometry/Rotation2d.h>
+#include <wpi/numbers>
+#include <frc/smartdashboard/Field2d.h>
 
 #include <networktables/NetworkTableValue.h>
 class Drivetrain {
@@ -20,7 +22,7 @@ class Drivetrain {
 
         }
         void setupDriveMotors();
-        void Drive(frc::PS4Controller m_driverController);
+        void Drive(frc::PS4Controller* m_driverController);
         void resetEncoders();
         void updateOdometry();
     private:
@@ -35,5 +37,6 @@ class Drivetrain {
         frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
         AHRS *ahrs;
         frc::Rotation2d rot = frc::Rotation2d{units::angle::degree_t{ahrs->GetAngle()}};
-        frc::DifferentialDriveOdometry odemetry{rot};
+        frc::DifferentialDriveOdometry m_odometry{rot};
+        frc::Field2d m_field;
 };

@@ -50,64 +50,9 @@
 #include <frc/kinematics/DifferentialDriveOdometry.h>
 #include <frc/kinematics/DifferentialDriveWheelSpeeds.h>
 #include <frc/geometry/Rotation2d.h>
-struct Robot : public frc::TimedRobot {
-
-  rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
-
-  // Intake Motors
-  //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
-  TalonSRX m_intakeSpinMotor{14};
-  TalonSRX m_backTriggerMotor{18}; 
-  TalonSRX m_intakeWheel{21};
-  TalonSRX* seven_seventies[3] = {&m_intakeSpinMotor, &m_backTriggerMotor, &m_intakeWheel};
-  TalonFX m_rightShooterMotor{15};
-  TalonFX m_leftShooterMotor{19};
-  TalonFX m_backShooterMotor{17};
-  TalonFX* Talons[3] = {&m_rightShooterMotor, &m_leftShooterMotor, &m_backShooterMotor};
-  
-  TalonFX m_intakeArm{20};
-  TalonFX m_leftClimber{6};
-  TalonFX m_rightClimber{7};
-  //frc::XboxController m_driverController{0};  
-  frc::PS4Controller m_driverController{0};
-  frc::XboxController m_operatorController{1};
-  frc::BangBangController controller;
-  double setpoint = 0;
-  double kF;
-  double kP;
-  //Gyro
-  
-  //frc2::PIDController pid{kP, kI, kD};
-  frc::DifferentialDriveOdometry m_odometry;
-  frc::Field2d m_field;
-
-  double L = 2;
-  double K = 0.8;
-  double x_0 = 0;  
-  //limelight
-  std::shared_ptr<nt::NetworkTable> table = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
-  // Target Offset Angle Horizontal
-  double tx;
-  // Target Offset Angle Vertical
-  double ty;
-  // Target Area
-  double ta;
-  // Target Skew
-  double ts;
-  double correction;
-  float kp = 0.05f;
-  float min_command = 0.01f;
- // https://docs.limelightvision.io/en/latest/_images/DistanceEstimation.jpg
-  double h_1; // hieght of camera above the floor
-  double h_2; // hieght of reflective target
-  double theta_1; // fixed angle of the mounted limelight
-  double theta_2; // angle of the camera to targ  et (theta_2 = ty)
-  double d; // distance to target (lol) (should be returned by DetermineDistance())
-  double steeringadjust;
-  // Create a new SimpleMotorFeedforward with gains kS, kV, and kA
-  // Distance is measured in meters
-  //Find kS, kV, kA experimentally with sysID
-
+#include "drivetrain.h"
+class Robot : public frc::TimedRobot {
+  public:
   void RobotInit() override;
   void RobotPeriodic() override;
 
@@ -227,4 +172,63 @@ struct Robot : public frc::TimedRobot {
   }
   double AutoTargetTurn();
   double DetermineDistance();
+  private:
+  Drivetrain m_drive;
+  rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
+
+  // Intake Motors
+  //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
+  TalonSRX m_intakeSpinMotor{14};
+  TalonSRX m_backTriggerMotor{18}; 
+  TalonSRX m_intakeWheel{21};
+  TalonSRX* seven_seventies[3] = {&m_intakeSpinMotor, &m_backTriggerMotor, &m_intakeWheel};
+  TalonFX m_rightShooterMotor{15};
+  TalonFX m_leftShooterMotor{19};
+  TalonFX m_backShooterMotor{17};
+  TalonFX* Talons[3] = {&m_rightShooterMotor, &m_leftShooterMotor, &m_backShooterMotor};
+  
+  TalonFX m_intakeArm{20};
+  TalonFX m_leftClimber{6};
+  TalonFX m_rightClimber{7};
+  //frc::XboxController m_driverController{0};  
+  frc::PS4Controller m_driverController{0};
+  frc::XboxController m_operatorController{1};
+  frc::BangBangController controller;
+  double setpoint = 0;
+  double kF;
+  double kP;
+  //Gyro
+  AHRS *ahrs;
+  //frc2::PIDController pid{kP, kI, kD};
+  //frc::DifferentialDriveOdometry m_odometry;
+  //frc::Field2d m_field;
+
+  double L = 2;
+  double K = 0.8;
+  double x_0 = 0;  
+  //limelight
+  std::shared_ptr<nt::NetworkTable> table = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
+  // Target Offset Angle Horizontal
+  double tx;
+  // Target Offset Angle Vertical
+  double ty;
+  // Target Area
+  double ta;
+  // Target Skew
+  double ts;
+  double correction;
+  float kp = 0.05f;
+  float min_command = 0.01f;
+ // https://docs.limelightvision.io/en/latest/_images/DistanceEstimation.jpg
+  double h_1; // hieght of camera above the floor
+  double h_2; // hieght of reflective target
+  double theta_1; // fixed angle of the mounted limelight
+  double theta_2; // angle of the camera to targ  et (theta_2 = ty)
+  double d; // distance to target (lol) (should be returned by DetermineDistance())
+  double steeringadjust;
+  // Create a new SimpleMotorFeedforward with gains kS, kV, and kA
+  // Distance is measured in meters
+  //Find kS, kV, kA experimentally with sysID
+
+
 };

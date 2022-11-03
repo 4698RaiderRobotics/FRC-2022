@@ -1,11 +1,11 @@
 #include "Robot.h"
-#include "odometry.h"
+//#include "odometry.h"
 // to-do
 // implement https://docs.wpilib.org/en/latest/docs/software/pathplanning/trajectory-tutorial/index.html
 void Robot::RobotInit() {
   SetupMotors();
-  m_odometry = setupOdometry(&DriveEncoders[0], &DriveEncoders[2], ahrs);
-  frc::SmartDashboard::PutData("Field", &m_field);
+  //m_odometry = setupOdometry(&DriveEncoders[0], &DriveEncoders[2], ahrs);
+  //frc::SmartDashboard::PutData("Field", &m_field);
   //camera
   frc::CameraServer::StartAutomaticCapture();
   ResetEncoders();
@@ -15,7 +15,7 @@ void Robot::RobotInit() {
   //orc.LoadMusic("amongus.chrp");
   try
   {
-    ahrs = new AHRS(frc::SPI::kMXP);
+    //ahrs = new AHRS(frc::SPI::kMXP);
   }
   catch(const std::exception& e)
   {
@@ -32,13 +32,9 @@ void Robot::RobotPeriodic() {
   double display_velocity = m_leftShooterMotor.GetSelectedSensorVelocity()*0.29296875;
   frc::SmartDashboard::PutNumber("wheel_speed", display_velocity);
   get_gyro();
-  auto gyro_angle = frc::Rotation2d{units::angle::degree_t{-ahrs->GetAngle()}};
-  units::length::meter_t diameter = units::length::inch_t{4};
-  units::length::meter_t left{DriveEncoders[0].GetPosition()*diameter*wpi::numbers::pi};
-  units::length::meter_t right{DriveEncoders[2].GetPosition()*diameter*wpi::numbers::pi};
-  m_odometry.Update(gyro_angle, left, right);
-  m_field.SetRobotPose(m_odometry.GetPose());
-}
+  m_drive.updateOdometry();
+  //m_field.SetRobotPose(m_odometry.GetPose());
+} 
 void Robot::AutonomousInit() {
   table->PutNumber("pipeline", 0);  
   ResetEncoders();
@@ -50,11 +46,11 @@ void Robot::AutonomousPeriodic() {
 /*   if(AutoTargetTurn() != 0) {
     correction = AutoTargetTurn();
   } */
-  int rotations = 7;
-  if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
-    //pretty sure Arcade Drive function rotation and speed are flipped for somereason
-    m_robotDrive.ArcadeDrive(0, 0.7);
-  }
+  // int rotations = 7;
+  // if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
+  //   //pretty sure Arcade Drive function rotation and speed are flipped for somereason
+  //   m_robotDrive.ArcadeDrive(0, 0.7);
+  // }
 /*   if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
     //pretty sure Arcade Drive function rotation and speed are flipped for somereason
     m_robotDrive.ArcadeDrive(0.7, correction);
@@ -129,8 +125,7 @@ void Robot::TeleopPeriodic() {
   if (m_driverController.GetPOV() == 0) {m_leftClimber.Set(ControlMode::PercentOutput, 0.5);}
     else if (m_driverController.GetPOV() == 180) {m_leftClimber.Set(ControlMode::PercentOutput, -0.5);}
       else {m_leftClimber.Set(ControlMode::PercentOutput, 0);}
-  DriveMethod();
-
+  m_drive.Drive(&m_driverController);
 
 }
 
