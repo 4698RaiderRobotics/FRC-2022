@@ -1,9 +1,10 @@
 #include "Robot.h"
+#include "odometry.h"
 // to-do
 // implement https://docs.wpilib.org/en/latest/docs/software/pathplanning/trajectory-tutorial/index.html
 void Robot::RobotInit() {
   SetupMotors();
-
+  m_odometry = setupOdometry(&DriveEncoders[0], &DriveEncoders[2], ahrs);
   //camera
   frc::CameraServer::StartAutomaticCapture();
   ResetEncoders();
@@ -29,6 +30,12 @@ void Robot::RobotPeriodic() {
   ts = table->GetNumber("ts",0.0);
   double display_velocity = m_leftShooterMotor.GetSelectedSensorVelocity()*0.29296875;
   frc::SmartDashboard::PutNumber("wheel_speed", display_velocity);
+  get_gyro();
+  auto gyro_angle = frc::Rotation2d{units::angle::degree_t{-ahrs->GetAngle()}};
+  units::length::meter_t diameter = units::length::inch_t{4};
+  units::length::meter_t left{DriveEncoders[0].GetPosition()*diameter*wpi::numbers::pi};
+  units::length::meter_t right{DriveEncoders[2].GetPosition()*diameter*wpi::numbers::pi};
+  m_odometry.Update(gyro_angle, left, right);
 }
 void Robot::AutonomousInit() {
   table->PutNumber("pipeline", 0);  

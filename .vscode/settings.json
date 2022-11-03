@@ -18,6 +18,7 @@
   "editor.fontFamily": "Fira Code, Consolas, 'Courier New', monospace",
   "files.associations": {
     "*.h": "cpp",
-    "sstream": "cpp"
+    "sstream": "cpp",
+    "numbers": "cpp"
   }
 }

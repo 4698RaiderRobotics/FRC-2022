@@ -43,7 +43,12 @@
 //}
 //template <class Distance>
 #include <AHRS.h>
-
+#include <frc/drive/DifferentialDrive.h>
+#include <frc/kinematics/DifferentialDriveKinematics.h>
+#include <frc/kinematics/DifferentialDriveOdometry.h>
+#include <frc/kinematics/DifferentialDriveWheelSpeeds.h>
+#include <frc/geometry/Rotation2d.h>
+#include <units/length.h>
 struct Robot : public frc::TimedRobot {
 
   // Drive Motors
@@ -79,8 +84,7 @@ struct Robot : public frc::TimedRobot {
   //Gyro
   AHRS *ahrs;
   //frc2::PIDController pid{kP, kI, kD};
-
-
+  frc::DifferentialDriveOdometry m_odometry;
   double L = 2;
   double K = 0.8;
   double x_0 = 0;  
@@ -125,7 +129,6 @@ struct Robot : public frc::TimedRobot {
 
   void SimulationInit() override;
   void SimulationPeriodic() override;
-
   void SetupMotors(){
 
     for (rev::CANSparkMax* motor : DriveMotors) {
