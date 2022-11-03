@@ -52,16 +52,8 @@
 #include <frc/geometry/Rotation2d.h>
 struct Robot : public frc::TimedRobot {
 
-  // Drive Motors
-  static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
-  rev::CANSparkMax m_leftLeadMotor{leftLeadDeviceID, rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_rightLeadMotor{rightLeadDeviceID, rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_leftFollowMotor{leftFollowDeviceID, rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax m_rightFollowMotor{rightFollowDeviceID, rev::CANSparkMax::MotorType::kBrushless};
-  rev::CANSparkMax* DriveMotors[4]= {&m_leftLeadMotor, &m_rightLeadMotor, &m_leftFollowMotor, &m_rightFollowMotor};
   rev::CANSparkMax m_frontTriggerMotor{6, rev::CANSparkMax::MotorType::kBrushless};
-  rev::SparkMaxRelativeEncoder DriveEncoders[4] = {DriveMotors[0]->GetEncoder(),DriveMotors[1]->GetEncoder(),DriveMotors[2]->GetEncoder(),DriveMotors[3]->GetEncoder()};  
-  frc::DifferentialDrive m_robotDrive{m_leftLeadMotor,m_rightLeadMotor};
+
   // Intake Motors
   //rev::CANSparkMax m_intakeSpinMotor{10, rev::CANSparkMax::MotorType::kBrushless};
   TalonSRX m_intakeSpinMotor{14};
@@ -84,7 +76,7 @@ struct Robot : public frc::TimedRobot {
   double kF;
   double kP;
   //Gyro
-  AHRS *ahrs;
+  
   //frc2::PIDController pid{kP, kI, kD};
   frc::DifferentialDriveOdometry m_odometry;
   frc::Field2d m_field;
@@ -134,12 +126,6 @@ struct Robot : public frc::TimedRobot {
   void SimulationInit() override;
   void SimulationPeriodic() override;
   void SetupMotors(){
-
-    for (rev::CANSparkMax* motor : DriveMotors) {
-      motor->RestoreFactoryDefaults();
-      motor->SetSmartCurrentLimit(70);
-      motor->SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
-    }
     for (TalonFX* motor : Talons) {
       motor->ConfigFactoryDefault();
       motor->ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration{true, 30, 40, 1});
@@ -164,15 +150,11 @@ struct Robot : public frc::TimedRobot {
     m_frontTriggerMotor.RestoreFactoryDefaults();
     //m_frontTriggerMotor.SetInverted(true);
     m_frontTriggerMotor.SetSmartCurrentLimit(30);
-    m_leftFollowMotor.Follow(m_leftLeadMotor);
-    m_rightFollowMotor.Follow(m_rightLeadMotor);
+
     m_backTriggerMotor.SetInverted(true);
     m_leftClimber.SetNeutralMode(NeutralMode::Brake);
     m_rightClimber.SetNeutralMode(NeutralMode::Brake);
-    for(rev::SparkMaxRelativeEncoder encoder:DriveEncoders) {
-      //1/7th
-      encoder.SetPositionConversionFactor(0.142857);
-    }
+
 /*     units::voltage::volt_t ks{0.5};
     auto kV = units::volt_t{1} * units::second_t{1} / units::meter_t{1};
     auto kA = units::volt_t{1} * units::second_t{1} * units::second_t{1} / units::meter_t{1}; 
@@ -182,23 +164,13 @@ struct Robot : public frc::TimedRobot {
   }
   void DriveMethod(){
     //Forza™️ Controls:
-    if(m_driverController.GetCrossButton()){
-      m_robotDrive.ArcadeDrive(steeringadjust, 0);
-    }
-    else {
-      m_driverController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, m_driverController.GetR2Axis());
-      m_driverController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, m_driverController.GetL2Axis());
-      m_robotDrive.ArcadeDrive(-m_driverController.GetLeftX()*0.75,m_driverController.GetL2Axis()-m_driverController.GetR2Axis());
-    }
+  
   }
   void Intake(double speed) {
     m_intakeSpinMotor.Set(ctre::phoenix::motorcontrol::ControlMode{0}, speed);
   }
 
   void ResetEncoders() {
-    for (rev::SparkMaxRelativeEncoder encoder: DriveEncoders) {
-      encoder.SetPosition(0);
-    }
   }
   template<typename _Function>
   void Bind(bool buttonstate, _Function __F) {
