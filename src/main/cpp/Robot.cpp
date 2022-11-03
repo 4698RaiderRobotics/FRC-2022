@@ -96,9 +96,9 @@ void Robot::TeleopPeriodic() {
   if(m_operatorController.GetRightBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, 0.2);}
     else if(m_operatorController.GetLeftBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, -0.2);}
       else{m_intakeArm.Set(ControlMode::PercentOutput, 0);}
-  if(m_driverController.GetAButtonPressed()) {table->PutNumber("pipeline", 0);}
-  if (m_driverController.GetAButton()) {correction = AutoTargetTurn();}
-  if (m_driverController.GetAButtonReleased()) {
+  if(m_driverController.GetCrossButtonPressed()) {table->PutNumber("pipeline", 0);}
+  if (m_driverController.GetCrossButton()) {correction = AutoTargetTurn();}
+  if (m_driverController.GetCrossButtonReleased()) {
   //table->PutNumber("pipeline", 2);
   }
   if (m_driverController.GetRightY() > 0.4) {m_rightClimber.Set(ControlMode::PercentOutput, 0.5);}
