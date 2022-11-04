@@ -87,8 +87,8 @@ struct Robot : public frc::TimedRobot {
   // Target Skew
   double ts;
   double correction;
-  float kp = 0.05f;
-  float min_command = 0.01f;
+  float kp = 0.03f;
+  float min_command = 0.1f;
  // https://docs.limelightvision.io/en/latest/_images/DistanceEstimation.jpg
   double h_1; // hieght of camera above the floor
   double h_2; // hieght of reflective target

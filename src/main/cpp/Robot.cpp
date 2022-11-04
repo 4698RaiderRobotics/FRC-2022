@@ -18,6 +18,8 @@ void Robot::RobotPeriodic() {
   ts = table->GetNumber("ts",0.0);
   double display_velocity = m_leftShooterMotor.GetSelectedSensorVelocity()*0.29296875;
   frc::SmartDashboard::PutNumber("wheel_speed", display_velocity);
+  double distance = DetermineDistance();
+  frc::SmartDashboard::PutNumber("distance", distance);
 }
 void Robot::AutonomousInit() {
   table->PutNumber("pipeline", 0);  
@@ -61,7 +63,6 @@ void Robot::TeleopPeriodic() {
   Shoot(setpoint, &m_leftShooterMotor, &m_backShooterMotor);
   frc::SmartDashboard::PutNumber("raw_flywheel_speed", m_leftShooterMotor.GetSelectedSensorVelocity());
   //double wheel_velocity = m_leftShooterMotor.GetSelectedSensorVelocity();
-  frc::SmartDashboard::PutNumber("Target Distance", DetermineDistance());
   if(m_operatorController.GetXButton()) {
     Intake(0.8);
   }
@@ -140,7 +141,8 @@ double Robot::AutoTargetTurn(){
   return steeringadjust;
 }
 double Robot::DetermineDistance(){
-  d = (h_2 - h_1) / tan(theta_1 + theta_2);
+  units::angle::radian_t theta = units::angle::degree_t{ty}; 
+  double d = 86/units::math::tan(units::angle::radian_t{0.54}+theta);
   return d;
 }
 
