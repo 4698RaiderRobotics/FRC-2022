@@ -19,11 +19,13 @@
 
 #include <array>
 #include <cstdio>
+#include <cmath>
 #include <wpi/span.h>
 #include <iostream>
 #include <string.h>
 #include <wpi/numbers>
 #include <wpi/math>
+
 #include <cameraserver/CameraServer.h>
 #include <cmath>
 #include <algorithm>
@@ -38,6 +40,7 @@
 #include <units/voltage.h>
 #include <units/length.h>
 #include <units/acceleration.h>
+#include <ratio>
 //}
 //template <class Distance>
 struct Robot : public frc::TimedRobot {
@@ -70,7 +73,7 @@ struct Robot : public frc::TimedRobot {
   frc::PS4Controller m_driverController{0}; 
   frc::XboxController m_operatorController{1};
   frc::BangBangController controller;
-  double setpoint = 0;
+  //double setpoint = 0;
   double kF;
   double kP;
   double L = 2;
@@ -87,8 +90,8 @@ struct Robot : public frc::TimedRobot {
   // Target Skew
   double ts;
   double correction;
-  float kp = 0.03f;
-  float min_command = 0.1f;
+  float kp = 0.015f;
+  float min_command = 0.2f;
  // https://docs.limelightvision.io/en/latest/_images/DistanceEstimation.jpg
   double h_1; // hieght of camera above the floor
   double h_2; // hieght of reflective target
@@ -100,6 +103,9 @@ struct Robot : public frc::TimedRobot {
   // Distance is measured in meters
   //Find kS, kV, kA experimentally with sysID
 
+  using encoder_tic = units::unit<std::ratio<1,2048>, units::angle::turns>;
+  using tics_per_100ms = units::compound_unit<encoder_tic, units::inverse<units::time::deciseconds>>;
+  using tics_per_100ms_t = units::unit_t<tics_per_100ms>;
   void RobotInit() override;
   void RobotPeriodic() override;
 
@@ -119,7 +125,8 @@ struct Robot : public frc::TimedRobot {
   void SimulationPeriodic() override;
 
   void SetupMotors(){
-
+    frc::SmartDashboard::SetDefaultNumber("backspin", 1);
+    frc::SmartDashboard::SetDefaultNumber("triggerspeed", 2000);
     for (rev::CANSparkMax* motor : DriveMotors) {
       motor->RestoreFactoryDefaults();
       motor->SetSmartCurrentLimit(70);
@@ -185,6 +192,22 @@ struct Robot : public frc::TimedRobot {
       encoder.SetPosition(0);
     }
   }
+  void Shoot(TalonFX* shootermotor, TalonFX* m_backShooterMotor) { 
+//m_leftShooterMotor.Set(ControlMode{0}, speed);
+
+    units::angular_velocity::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("setpoint_rpm", 0)};
+    tics_per_100ms_t motor_setpoint{setpoint};
+    shootermotor->Set(ControlMode::Velocity, motor_setpoint.value());
+    if(setpoint > units::revolutions_per_minute_t{0}) {
+        double backspin = frc::SmartDashboard::GetNumber("backspin", 1);
+        m_backShooterMotor->Set(ControlMode::PercentOutput, backspin);    
+    }
+    else {
+        m_backShooterMotor->Set(ControlMode::PercentOutput, 0);
+    }
+    
+    //m_leftShooterMotor.Set(ControlMode::PercentOutput, calculated_setpoint);
+}
   template<typename _Function>
   void Bind(bool buttonstate, _Function __F) {
     if(buttonstate) {
