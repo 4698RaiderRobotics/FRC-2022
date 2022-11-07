@@ -6,7 +6,10 @@ void Robot::RobotInit() {
   SetupMotors();
 
   //camera
-  frc::CameraServer::StartAutomaticCapture();
+  cs::UsbCamera camera = frc::CameraServer::StartAutomaticCapture();
+  camera.SetResolution(320,240);
+  camera.SetFPS(5);
+
   ResetEncoders();
   SetupPID(&m_leftShooterMotor);
   //frc::SmartDashboard::PutNumber("rpm_target", 6000);
