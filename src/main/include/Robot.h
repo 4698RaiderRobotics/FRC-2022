@@ -41,9 +41,12 @@
 #include <units/length.h>
 #include <units/acceleration.h>
 #include <ratio>
+#include <frc/DriverStation.h>
+#include <frc/Timer.h>
 //}
 //template <class Distance>
 struct Robot : public frc::TimedRobot {
+  frc::Timer timer = frc::Timer();
 
   // Drive Motors
   static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
@@ -124,9 +127,9 @@ struct Robot : public frc::TimedRobot {
   void SimulationInit() override;
   void SimulationPeriodic() override;
 
-  void SetupMotors(){
+  void SetupMotors(){ 
     frc::SmartDashboard::SetDefaultNumber("backspin", 1);
-    frc::SmartDashboard::SetDefaultNumber("triggerspeed", 2000);
+    frc::SmartDashboard::SetDefaultNumber("triggerspeed", 3030);
     for (rev::CANSparkMax* motor : DriveMotors) {
       motor->RestoreFactoryDefaults();
       motor->SetSmartCurrentLimit(70);

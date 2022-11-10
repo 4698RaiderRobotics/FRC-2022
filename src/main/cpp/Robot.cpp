@@ -21,29 +21,66 @@ void Robot::RobotPeriodic() {
   ta = table->GetNumber("ta",0.0);
   ts = table->GetNumber("ts",0.0);
   
+  
   tics_per_100ms_t current_velocity{m_leftShooterMotor.GetSelectedSensorVelocity()};
   frc::SmartDashboard::PutNumber("flywheel_velocity_rpm", units::revolutions_per_minute_t{current_velocity}.value());
+  tics_per_100ms_t current_back_velocity{m_backShooterMotor.GetSelectedSensorVelocity()};
+  frc::SmartDashboard::PutNumber("backmotor velocity", units::revolutions_per_minute_t{current_back_velocity}.value());
   double distance = DetermineDistance();
   frc::SmartDashboard::PutNumber("distance", distance);
+  
 }
 void Robot::AutonomousInit() {
   table->PutNumber("pipeline", 0);  
   ResetEncoders();
+  frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
+  timer.Reset();
+
 }
 void Robot::AutonomousPeriodic() {
-  correction = 0;
-/*   if(AutoTargetTurn() != 0) {
-    correction = AutoTargetTurn();
-  } */
+  Shoot(&m_leftShooterMotor, &m_backShooterMotor);
+  units::revolutions_per_minute_t setpoint_rpm{3700}; 
+
+  frc::SmartDashboard::PutNumber("setpoint_rpm", setpoint_rpm.value());
   int rotations = 5;
   if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
     //pretty sure Arcade Drive function rotation and speed are flipped for somereason
-    m_robotDrive.ArcadeDrive(0, 0.7);
+    m_robotDrive.ArcadeDrive(0, 0.5);
+    
   }
+  else {
+    units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
+    
+    bool ready_to_fire = (units::math::abs(setpoint_rpm - current)) < units::revolutions_per_minute_t{200};
+    if (ready_to_fire) {
+      timer.Start();
+      
+      Intake(0.8);
+      m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
+      m_frontTriggerMotor.Set(1.0);
+    }
+    frc::SmartDashboard::PutNumber("timer", timer.Get().value());
+    if (timer.HasElapsed(units::second_t{4.5})) {
+      frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
+      Intake(0);
+      m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
+      m_frontTriggerMotor.Set(0);
+      double rot2 = 3;
+      if(abs(DriveEncoders[1].GetPosition()) < rot2+rotations || abs(DriveEncoders[2].GetPosition()) < rot2+rotations) {
+      //pretty sure Arcade Drive function rotation and speed are flipped for somereason
+         m_robotDrive.ArcadeDrive(0, 0.5);
+    
+      }
+      
+    }
+  }
+  //frc::SmartDashboard::PutNumber("setpoint_rpm", 3400);
+
+
 }
 void Robot::TeleopInit() {
+  frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
   SetupMotors();
-  //testing ↘️⬇️
   table->PutNumber("pipeline", 0);
   m_leftShooterMotor.Set(ControlMode::PercentOutput, 0);
   m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
@@ -63,7 +100,7 @@ void Robot::TeleopPeriodic() {
   else {
     Intake(0);
   }
-  units::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("triggerspeed", 2000)};
+  units::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("triggerspeed", 3500)};
   units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
   frc::SmartDashboard::PutBoolean("ready_to_fire", units::math::abs(setpoint - current) - 300_rpm < units::revolutions_per_minute_t{200});
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
@@ -99,14 +136,15 @@ void Robot::TeleopPeriodic() {
     m_backTriggerMotor.Set(ControlMode::PercentOutput, 0.0);
   }
   if (m_operatorController.GetLeftTriggerAxis() > 0.5) {m_frontTriggerMotor.Set(1);}
-  else if(m_operatorController.GetPOV() == 180) {
+  else if(m_operatorController.GetAButton()) {
     m_frontTriggerMotor.Set(-1);
+    frc::SmartDashboard::PutNumber("setpoint_rpm", -800);
   }
   else {
     m_frontTriggerMotor.Set(0);
   }
-  if (m_operatorController.GetPOV() == 0) {
-    frc::SmartDashboard::PutNumber("setpoint_rpm", -800);
+  if (m_operatorController.GetYButton()) {
+    m_backTriggerMotor.Set(ControlMode::PercentOutput, -1.0);
   }
   if(m_operatorController.GetRightBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, 0.2);}
     else if(m_operatorController.GetLeftBumper()) {m_intakeArm.Set(ControlMode::PercentOutput, -0.2);}
@@ -127,11 +165,26 @@ void Robot::TeleopPeriodic() {
 
 }
 
-void Robot::DisabledInit() {}
+void Robot::DisabledInit() {
+  frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
+}
 void Robot::DisabledPeriodic() {}
 void Robot::TestInit() {
+ // f-gain 0.17286
+  frc::SmartDashboard::SetDefaultNumber("back-F Gain", 0.17286);
+  frc::SmartDashboard::SetDefaultNumber("back-P Gain", 0);
+  frc::SmartDashboard::SetDefaultNumber("back units target", 0);
 }
-void Robot::TestPeriodic() {}
+void Robot::TestPeriodic() {
+  double kF_b = frc::SmartDashboard::GetNumber("back-F Gain",0.17286);
+  double kP_b = frc::SmartDashboard::GetNumber("back-P Gain", 0);
+  m_backShooterMotor.Config_kF(0,kF_b);
+  m_backShooterMotor.Config_kP(0,kP_b);
+  tics_per_100ms_t target{frc::SmartDashboard::GetNumber("back units target",0)};
+  tics_per_100ms_t shooter_velocity{m_backShooterMotor.GetSelectedSensorVelocity()};
+  frc::SmartDashboard::PutNumber("shooter_velocity", shooter_velocity.value());
+  m_backShooterMotor.Set(ControlMode::Velocity, target.value());
+}
 void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
 double Robot::AutoTargetTurn(){  
