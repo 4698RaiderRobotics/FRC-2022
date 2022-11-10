@@ -39,7 +39,8 @@ void Robot::AutonomousInit() {
 }
 void Robot::AutonomousPeriodic() {
   Shoot(&m_leftShooterMotor, &m_backShooterMotor);
-  units::revolutions_per_minute_t setpoint_rpm{3700}; 
+  //3700
+  units::revolutions_per_minute_t setpoint_rpm{2200}; 
 
   frc::SmartDashboard::PutNumber("setpoint_rpm", setpoint_rpm.value());
   int rotations = 5;
@@ -51,18 +52,19 @@ void Robot::AutonomousPeriodic() {
   else {
     units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
     
-    bool ready_to_fire = (units::math::abs(setpoint_rpm - current)) < units::revolutions_per_minute_t{200};
+    bool ready_to_fire = (units::math::abs(setpoint_rpm - current)) < units::revolutions_per_minute_t{500};
     if (ready_to_fire) {
       timer.Start();
       
-      Intake(0.8);
+      //Intake(0.8);
+      m_intakeWheel.Set(ctre::phoenix::motorcontrol::ControlMode{0}, 1.0);
       m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
       m_frontTriggerMotor.Set(1.0);
     }
     frc::SmartDashboard::PutNumber("timer", timer.Get().value());
-    if (timer.HasElapsed(units::second_t{4.5})) {
+    if (timer.HasElapsed(units::second_t{3})) {
       frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
-      Intake(0);
+      m_intakeWheel.Set(ctre::phoenix::motorcontrol::ControlMode{0}, 0);
       m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
       m_frontTriggerMotor.Set(0);
       double rot2 = 3;
@@ -100,7 +102,7 @@ void Robot::TeleopPeriodic() {
   else {
     Intake(0);
   }
-  units::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("triggerspeed", 3500)};
+  units::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("triggerspeed", 2200)};
   units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
   frc::SmartDashboard::PutBoolean("ready_to_fire", units::math::abs(setpoint - current) - 300_rpm < units::revolutions_per_minute_t{200});
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {

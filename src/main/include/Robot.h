@@ -155,7 +155,7 @@ struct Robot : public frc::TimedRobot {
     //we disabled this for tuning [todo fix ]
     //m_backShooterMotor.Follow(m_leftShooterMotor);
     m_intakeSpinMotor.SetInverted(true);
-    m_intakeWheel.Follow(m_intakeSpinMotor);
+    //m_intakeWheel.Follow(m_intakeSpinMotor);
     m_frontTriggerMotor.RestoreFactoryDefaults();
     //m_frontTriggerMotor.SetInverted(true);
     m_frontTriggerMotor.SetSmartCurrentLimit(30);
@@ -188,6 +188,7 @@ struct Robot : public frc::TimedRobot {
   }
   void Intake(double speed) {
     m_intakeSpinMotor.Set(ctre::phoenix::motorcontrol::ControlMode{0}, speed);
+    m_intakeWheel.Set(ctre::phoenix::motorcontrol::ControlMode{0}, speed);
   }
 
   void ResetEncoders() {
