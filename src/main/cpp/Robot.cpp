@@ -7,9 +7,8 @@ void Robot::RobotInit() {
 
   //camera
   cs::UsbCamera camera = frc::CameraServer::StartAutomaticCapture();
-  camera.SetResolution(320,240);
+  camera.SetResolution(160,120);
   camera.SetFPS(5);
-
   ResetEncoders();
   SetupPID(&m_leftShooterMotor);
   //frc::SmartDashboard::PutNumber("rpm_target", 6000);
@@ -40,8 +39,8 @@ void Robot::AutonomousInit() {
 void Robot::AutonomousPeriodic() {
   Shoot(&m_leftShooterMotor, &m_backShooterMotor);
   //3700
-  units::revolutions_per_minute_t setpoint_rpm{2200}; 
-
+  units::revolutions_per_minute_t setpoint_rpm{2500}; 
+  frc::SmartDashboard::PutNumber("back rpm target", 1000);
   frc::SmartDashboard::PutNumber("setpoint_rpm", setpoint_rpm.value());
   int rotations = 5;
   if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
@@ -50,9 +49,10 @@ void Robot::AutonomousPeriodic() {
     
   }
   else {
+    
     units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
     
-    bool ready_to_fire = (units::math::abs(setpoint_rpm - current)) < units::revolutions_per_minute_t{500};
+    bool ready_to_fire = (setpoint_rpm - current) < units::revolutions_per_minute_t{500};
     if (ready_to_fire) {
       timer.Start();
       
@@ -102,7 +102,7 @@ void Robot::TeleopPeriodic() {
   else {
     Intake(0);
   }
-  units::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("triggerspeed", 2200)};
+  units::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("triggerspeed", 2500)};
   units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
   frc::SmartDashboard::PutBoolean("ready_to_fire", units::math::abs(setpoint - current) - 300_rpm < units::revolutions_per_minute_t{200});
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
@@ -169,6 +169,8 @@ void Robot::TeleopPeriodic() {
 
 void Robot::DisabledInit() {
   frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
+  timer.Stop();
+
 }
 void Robot::DisabledPeriodic() {}
 void Robot::TestInit() {

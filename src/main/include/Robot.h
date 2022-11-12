@@ -128,8 +128,8 @@ struct Robot : public frc::TimedRobot {
   void SimulationPeriodic() override;
 
   void SetupMotors(){ 
-    frc::SmartDashboard::SetDefaultNumber("backspin", 1);
-    frc::SmartDashboard::SetDefaultNumber("triggerspeed", 3030);
+    frc::SmartDashboard::SetDefaultNumber("back rpm target", 1000);
+    frc::SmartDashboard::SetDefaultNumber("triggerspeed", 2500);
     for (rev::CANSparkMax* motor : DriveMotors) {
       motor->RestoreFactoryDefaults();
       motor->SetSmartCurrentLimit(70);
@@ -161,13 +161,15 @@ struct Robot : public frc::TimedRobot {
     m_frontTriggerMotor.SetSmartCurrentLimit(30);
     m_leftFollowMotor.Follow(m_leftLeadMotor);
     m_rightFollowMotor.Follow(m_rightLeadMotor);
-    m_backTriggerMotor.SetInverted(true);
+    m_backTriggerMotor.SetInverted(false);
     m_leftClimber.SetNeutralMode(NeutralMode::Brake);
     m_rightClimber.SetNeutralMode(NeutralMode::Brake);
     for(rev::SparkMaxRelativeEncoder encoder:DriveEncoders) {
       //1/7th
       encoder.SetPositionConversionFactor(0.142857);
     }
+    m_backShooterMotor.Config_kF(0,0.1097);
+    m_backShooterMotor.Config_kP(0,0.22);
 /*     units::voltage::volt_t ks{0.5};
     auto kV = units::volt_t{1} * units::second_t{1} / units::meter_t{1};
     auto kA = units::volt_t{1} * units::second_t{1} * units::second_t{1} / units::meter_t{1}; 
@@ -203,13 +205,15 @@ struct Robot : public frc::TimedRobot {
     tics_per_100ms_t motor_setpoint{setpoint};
     shootermotor->Set(ControlMode::Velocity, motor_setpoint.value());
     if(setpoint > units::revolutions_per_minute_t{0}) {
-        double backspin = frc::SmartDashboard::GetNumber("backspin", 1);
-        m_backShooterMotor->Set(ControlMode::PercentOutput, backspin);    
+        units::revolutions_per_minute_t backspin{frc::SmartDashboard::GetNumber("back rpm target", 0)};
+        tics_per_100ms_t conv{backspin};
+        m_backShooterMotor->Set(ControlMode::Velocity, conv.value());    
     }
     else {
         m_backShooterMotor->Set(ControlMode::PercentOutput, 0);
     }
-    
+    //2860
+    //97.5
     //m_leftShooterMotor.Set(ControlMode::PercentOutput, calculated_setpoint);
 }
   template<typename _Function>
