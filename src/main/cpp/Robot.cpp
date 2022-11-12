@@ -4,7 +4,10 @@ using namespace units::literals;
 // implement https://docs.wpilib.org/en/latest/docs/software/pathplanning/trajectory-tutorial/index.html
 void Robot::RobotInit() {
   SetupMotors();
-
+  wpi::PortForwarder::GetInstance().Add(5800,"limelight.local",5800);
+  wpi::PortForwarder::GetInstance().Add(5801,"limelight.local",5801);
+  wpi::PortForwarder::GetInstance().Add(5805,"limelight.local",5805);
+  
   //camera
   cs::UsbCamera camera = frc::CameraServer::StartAutomaticCapture();
   camera.SetResolution(160,120);
@@ -13,6 +16,7 @@ void Robot::RobotInit() {
   SetupPID(&m_leftShooterMotor);
   //frc::SmartDashboard::PutNumber("rpm_target", 6000);
 }
+
 void Robot::RobotPeriodic() {
   PIDTuner(&m_leftShooterMotor);
   tx = table->GetNumber("tx",0.0);
@@ -107,7 +111,7 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutBoolean("ready_to_fire", units::math::abs(setpoint - current) - 300_rpm < units::revolutions_per_minute_t{200});
   if(m_operatorController.GetRightTriggerAxis() > 0.5) {
       frc::SmartDashboard::PutNumber("setpoint_rpm", setpoint.value());
-    if (units::math::abs(setpoint - current) - 300_rpm < units::revolutions_per_minute_t{200}) {
+    if ((setpoint - current) < units::revolutions_per_minute_t{300}) {
       m_operatorController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, 1 - units::math::abs(setpoint - current).value()*0.001);
       //m_operatorController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, 1 - units::math::abs(setpoint - current).value()*0.001);
       m_operatorController.SetRumble(frc::GenericHID::RumbleType::kRightRumble, 1);
@@ -121,7 +125,7 @@ void Robot::TeleopPeriodic() {
   }
   else {
     frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
-    if(units::math::abs(setpoint - current) - 300_rpm >= units::revolutions_per_minute_t{200}) {
+    if((setpoint - current) >= units::revolutions_per_minute_t{300}) {
       m_operatorController.SetRumble(frc::GenericHID::RumbleType::kLeftRumble,0);
       m_operatorController.SetRumble(frc::GenericHID::RumbleType::kRightRumble,0);
     }

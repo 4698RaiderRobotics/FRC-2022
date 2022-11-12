@@ -43,6 +43,7 @@
 #include <ratio>
 #include <frc/DriverStation.h>
 #include <frc/Timer.h>
+#include <wpi/PortForwarder.h>
 //}
 //template <class Distance>
 struct Robot : public frc::TimedRobot {
@@ -203,25 +204,22 @@ struct Robot : public frc::TimedRobot {
 
     units::angular_velocity::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("setpoint_rpm", 0)};
     tics_per_100ms_t motor_setpoint{setpoint};
-    shootermotor->Set(ControlMode::Velocity, motor_setpoint.value());
+    
     if(setpoint > units::revolutions_per_minute_t{0}) {
-        units::revolutions_per_minute_t backspin{frc::SmartDashboard::GetNumber("back rpm target", 0)};
-        tics_per_100ms_t conv{backspin};
-        m_backShooterMotor->Set(ControlMode::Velocity, conv.value());    
+      shootermotor->Set(ControlMode::Velocity, motor_setpoint.value());
+      units::revolutions_per_minute_t backspin{frc::SmartDashboard::GetNumber("back rpm target", 0)};
+      tics_per_100ms_t conv{backspin};
+      m_backShooterMotor->Set(ControlMode::Velocity, conv.value());    
     }
     else {
-        m_backShooterMotor->Set(ControlMode::PercentOutput, 0);
+      shootermotor->Set(ControlMode::PercentOutput, 0);
+      m_backShooterMotor->Set(ControlMode::PercentOutput, 0);
     }
     //2860
     //97.5
     //m_leftShooterMotor.Set(ControlMode::PercentOutput, calculated_setpoint);
 }
-  template<typename _Function>
-  void Bind(bool buttonstate, _Function __F) {
-    if(buttonstate) {
-      __F();
-    }
-  }
+
   double AutoTargetTurn();
   double DetermineDistance();
   frc::Field2d m_fieldSim;
