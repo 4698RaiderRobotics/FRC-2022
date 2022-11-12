@@ -48,7 +48,7 @@
 //template <class Distance>
 struct Robot : public frc::TimedRobot {
   frc::Timer timer = frc::Timer();
-
+  frc::Timer timer2 = frc::Timer();
   // Drive Motors
   static const int leftLeadDeviceID = 1, leftFollowDeviceID = 2, rightLeadDeviceID = 3, rightFollowDeviceID = 4;
   rev::CANSparkMax m_leftLeadMotor{leftLeadDeviceID, rev::CANSparkMax::MotorType::kBrushless};
@@ -205,7 +205,7 @@ struct Robot : public frc::TimedRobot {
     units::angular_velocity::revolutions_per_minute_t setpoint{frc::SmartDashboard::GetNumber("setpoint_rpm", 0)};
     tics_per_100ms_t motor_setpoint{setpoint};
     
-    if(setpoint > units::revolutions_per_minute_t{0}) {
+    if(setpoint != units::revolutions_per_minute_t{0}) {
       shootermotor->Set(ControlMode::Velocity, motor_setpoint.value());
       units::revolutions_per_minute_t backspin{frc::SmartDashboard::GetNumber("back rpm target", 0)};
       tics_per_100ms_t conv{backspin};

@@ -38,46 +38,50 @@ void Robot::AutonomousInit() {
   ResetEncoders();
   frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
   timer.Reset();
+  timer2.Reset();
 
 }
 void Robot::AutonomousPeriodic() {
-  Shoot(&m_leftShooterMotor, &m_backShooterMotor);
-  //3700
-  units::revolutions_per_minute_t setpoint_rpm{2500}; 
-  frc::SmartDashboard::PutNumber("back rpm target", 1000);
-  frc::SmartDashboard::PutNumber("setpoint_rpm", setpoint_rpm.value());
-  int rotations = 5;
-  if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
-    //pretty sure Arcade Drive function rotation and speed are flipped for somereason
-    m_robotDrive.ArcadeDrive(0, 0.5);
-    
-  }
-  else {
-    
-    units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
-    
-    bool ready_to_fire = (setpoint_rpm - current) < units::revolutions_per_minute_t{500};
-    if (ready_to_fire) {
-      timer.Start();
-      
-      //Intake(0.8);
-      m_intakeWheel.Set(ctre::phoenix::motorcontrol::ControlMode{0}, 1.0);
-      m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
-      m_frontTriggerMotor.Set(1.0);
-    }
-    frc::SmartDashboard::PutNumber("timer", timer.Get().value());
-    if (timer.HasElapsed(units::second_t{3})) {
-      frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
-      m_intakeWheel.Set(ctre::phoenix::motorcontrol::ControlMode{0}, 0);
-      m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
-      m_frontTriggerMotor.Set(0);
-      double rot2 = 3;
-      if(abs(DriveEncoders[1].GetPosition()) < rot2+rotations || abs(DriveEncoders[2].GetPosition()) < rot2+rotations) {
+  timer2.Start();
+  if (timer2.HasElapsed(units::time::second_t{5})) {
+    Shoot(&m_leftShooterMotor, &m_backShooterMotor);
+    //3700
+    units::revolutions_per_minute_t setpoint_rpm{2500}; 
+    frc::SmartDashboard::PutNumber("back rpm target", 1000);
+    frc::SmartDashboard::PutNumber("setpoint_rpm", setpoint_rpm.value());
+    int rotations = 5;
+    if(abs(DriveEncoders[1].GetPosition()) < rotations || abs(DriveEncoders[2].GetPosition()) < rotations) {
       //pretty sure Arcade Drive function rotation and speed are flipped for somereason
-         m_robotDrive.ArcadeDrive(0, 0.5);
-    
-      }
+      m_robotDrive.ArcadeDrive(0, 0.5);
       
+    }
+    else {
+      
+      units::revolutions_per_minute_t current{frc::SmartDashboard::GetNumber("flywheel_velocity_rpm", 0)};
+      
+      bool ready_to_fire = (setpoint_rpm - current) < units::revolutions_per_minute_t{500};
+      if (ready_to_fire) {
+        timer.Start();
+        
+        //Intake(0.8);
+        m_intakeWheel.Set(ctre::phoenix::motorcontrol::ControlMode{0}, 1.0);
+        m_backTriggerMotor.Set(ControlMode::PercentOutput, 1.0);
+        m_frontTriggerMotor.Set(1.0);
+      }
+      frc::SmartDashboard::PutNumber("timer", timer.Get().value());
+      if (timer.HasElapsed(units::second_t{3})) {
+        frc::SmartDashboard::PutNumber("setpoint_rpm", 0);
+        m_intakeWheel.Set(ctre::phoenix::motorcontrol::ControlMode{0}, 0);
+        m_backTriggerMotor.Set(ControlMode::PercentOutput, 0);
+        m_frontTriggerMotor.Set(0);
+        double rot2 = 3;
+        if(abs(DriveEncoders[1].GetPosition()) < rot2+rotations || abs(DriveEncoders[2].GetPosition()) < rot2+rotations) {
+        //pretty sure Arcade Drive function rotation and speed are flipped for somereason
+          m_robotDrive.ArcadeDrive(0, 0.5);
+      
+        }
+        
+      }
     }
   }
   //frc::SmartDashboard::PutNumber("setpoint_rpm", 3400);
